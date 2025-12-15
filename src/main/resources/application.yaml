@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: Iot-Project
+
+  datasource:
+    url: "jdbc:mysql://localhost:3306/identity_service"
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/IOT_MONGODB?authSource=admin
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /identity
+jwt:
+  secret-key: "Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi"
+mqtt:
+  server-uri: "tcp://localhost:1883"
+  username: "admin"
+  password: "123456789"
+  client-id: "iot_project"
