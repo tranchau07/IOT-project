@@ -3,6 +3,7 @@ package com.example.Iot_Project.exception;
 import com.example.Iot_Project.dto.response.ApiResponse;
 import com.example.Iot_Project.enums.ErrorCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -20,7 +21,7 @@ public class GlobalExceptionHandler {
         api.setCode(errorCode.getCode());
         api.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.badRequest().body(api);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(api);
     }
 
     @ExceptionHandler(value = AppException.class)
@@ -31,7 +32,18 @@ public class GlobalExceptionHandler {
         api.setCode(errorCode.getCode());
         api.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.badRequest().body(api);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(api);
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    ResponseEntity<ApiResponse<?>> handlerRuntimeException(AccessDeniedException e){
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+
+        ApiResponse<?> api = new ApiResponse<>();
+        api.setCode(errorCode.getCode());
+        api.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(api);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -51,6 +63,6 @@ public class GlobalExceptionHandler {
         api.setCode(errorCode.getCode());
         api.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.badRequest().body(api);
+        return ResponseEntity.status(errorCode.getStatusCode()).body(api);
     }
 }
