@@ -18,6 +18,12 @@ public enum ErrorCode {
     USER_DID_NOT_EXIST(1005, "User did not exist"),
     UNAUTHENTICATED(1006, "Unauthenticated"),
 
+
+    //Topic exception
+    DEVICE_NOT_EXISTED(2001, "Device is not existed"),
+    DEVICE_OFFLINE(2002, "Device is offline"),
+    COMMAND_NOT_EXISTED(2003, "Command is not existed")
+
     ;
     int code;
     String message;

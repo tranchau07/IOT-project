@@ -1,5 +1,7 @@
 package com.example.Iot_Project.controller;
 
+import com.example.Iot_Project.dto.request.AuthorizedUserIdRequest;
+import com.example.Iot_Project.dto.request.CommandRequest;
 import com.example.Iot_Project.dto.request.DeviceRequest;
 import com.example.Iot_Project.dto.response.ApiResponse;
 import com.example.Iot_Project.dto.response.DeviceResponse;
@@ -65,15 +67,29 @@ public class DeviceController {
     }
 
     @PostMapping("/{deviceId}/on")
-    ApiResponse<?> turnOnDevice(@PathVariable String deviceId){
-        mqttMessageHandlerService.sendControlCommand(deviceId, Command.TURN_ON.name());
+    ApiResponse<?> turnOnDevice(@PathVariable String deviceId,@RequestBody CommandRequest request){
+        mqttMessageHandlerService.sendControlCommand(deviceId, request);
         return ApiResponse.builder()
                 .build();
     }
     @PostMapping("/{deviceId}/off")
-    ApiResponse<?> turnOffDevice(@PathVariable String deviceId){
-        mqttMessageHandlerService.sendControlCommand(deviceId, Command.TURN_OFF.name());
+    ApiResponse<?> turnOffDevice(@PathVariable String deviceId,@RequestBody CommandRequest request){
+        mqttMessageHandlerService.sendControlCommand(deviceId, request);
         return ApiResponse.builder()
+                .build();
+    }
+
+    @PutMapping("/{deviceId}/authorize")
+    ApiResponse<DeviceResponse> authorizeUser(@RequestBody AuthorizedUserIdRequest request,@PathVariable String deviceId){
+        return ApiResponse.<DeviceResponse>builder()
+                .result(deviceService.authorizeUser(deviceId, request))
+                .build();
+    }
+
+    @PutMapping("/{deviceId}/revoke")
+    ApiResponse<DeviceResponse> revokeUser(@RequestBody AuthorizedUserIdRequest request,@PathVariable String deviceId){
+        return ApiResponse.<DeviceResponse>builder()
+                .result(deviceService.revokeUser(deviceId, request))
                 .build();
     }
 }

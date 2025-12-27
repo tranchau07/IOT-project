@@ -1,6 +1,6 @@
 package com.example.Iot_Project.enums;
 
-public enum Status {
+public enum DeviceStatus {
     ACTIVE,
     INACTIVE
 

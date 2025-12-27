@@ -25,7 +25,7 @@ import org.springframework.messaging.MessageHandler;
 @EnableIntegration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
-public class MqttConfiguration {
+public class MqttConfig {
 
     @NonFinal
     @Value("${mqtt.server-uri}")

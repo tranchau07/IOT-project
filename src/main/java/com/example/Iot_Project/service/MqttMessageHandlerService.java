@@ -1,8 +1,13 @@
 package com.example.Iot_Project.service;
 
+import com.example.Iot_Project.dto.request.CommandRequest;
+import com.example.Iot_Project.dto.response.CommandResponse;
+import com.example.Iot_Project.enity.Command;
+import com.example.Iot_Project.enity.Device;
 import com.example.Iot_Project.enity.SensorData;
-import com.example.Iot_Project.enums.MqttTopicType;
-import com.example.Iot_Project.enums.Status;
+import com.example.Iot_Project.enums.*;
+import com.example.Iot_Project.exception.AppException;
+import com.example.Iot_Project.repository.CommandRepository;
 import com.example.Iot_Project.repository.DeviceRepository;
 import com.example.Iot_Project.repository.SensorDataRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,8 +33,11 @@ import java.util.Objects;
 @Slf4j
 public class MqttMessageHandlerService {
     SensorDataRepository sensorDataRepository;
-    WebSocketService webSocketService;
+    CommandRepository commandRepository;
     DeviceRepository deviceRepository;
+
+
+    WebSocketService webSocketService;
     MessageChannel mqttOutboundChannel;
     ObjectMapper objectMapper;
 
@@ -80,33 +88,77 @@ public class MqttMessageHandlerService {
             device.setLastCommunication(Instant.now());
             webSocketService.broadCastDeviceStatus(deviceRepository.save(device));
         });
-
     }
+
     private void handleHeartbeat(String topic){
         String deviceId = topic.split("/")[1];
 
         deviceRepository.findById(deviceId).ifPresent(device -> {
-            device.setStatus(Status.ACTIVE.name());
+            device.setStatus(DeviceStatus.ACTIVE.name());
             device.setLastCommunication(Instant.now());
             deviceRepository.save(device);
         });
     }
+
     private void handleControlResponse(String topic, String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree((payload));
+        CommandResponse response =  objectMapper.treeToValue(jsonNode, CommandResponse.class);
 
-        String commandId = jsonNode.get("commandId").asText();
-        String status = jsonNode.get("status").asText();
+        Command command = commandRepository.findById(response.getCommandId()).orElseThrow(()
+                -> new AppException(ErrorCode.COMMAND_NOT_EXISTED));
+
+        log.info("1");
+        if (command.getStatus() == CommandStatus.SUCCESS
+                || command.getStatus() == CommandStatus.FAILED
+                || command.getStatus() == CommandStatus.TIMEOUT) {
+            return;
+        }
+        log.info("2");
+
+        CommandStatus newStatus = mapToCommandStatus(CommandResponseStatus.valueOf(response.getStatus()));
+
+        log.info(newStatus.toString());
+
+        command.setStatus(newStatus);
+        command.setResponsePayload(response);
+        command.setCompleteAt(Instant.now());
+        commandRepository.save(command);
     }
 
-    public void sendControlCommand(String deviceId, String command){
+    private CommandStatus mapToCommandStatus(CommandResponseStatus responseStatus) {
+        return switch (responseStatus) {
+            case SUCCESS -> CommandStatus.SUCCESS;
+            case ERROR -> CommandStatus.FAILED;
+        };
+    }
+
+    public void sendControlCommand(String deviceId, CommandRequest request){
         //topic
         String topic = String.format("devices/%s/control", deviceId);
-
-        //payload
         String commandId = "CMD_" + System.currentTimeMillis();
+        Instant now = Instant.now();
+
+        Device device = deviceRepository.findById(deviceId).orElseThrow(()
+                -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+
+        if(device.getStatus().equals(DeviceStatus.INACTIVE.name()))
+            throw new AppException(ErrorCode.DEVICE_OFFLINE);
+
+        Command cmd = Command.builder()
+                .id(commandId)
+                .command(request.getCommand())
+                .deviceId(deviceId)
+                .requestAt(request.getRequestAt())
+                .createAt(now)
+                .status(CommandStatus.CREATED)
+                .build();
+
+        commandRepository.save(cmd);
+        //payload
+
         String payload = String.format(
-                "{\"commandId\":\"%s\",\"command\":\"%s\",\"timestamp\":\"%s\"}",
-                commandId, command, Instant.now()
+                "{\"commandId\":\"%s\",\"command\":\"%s\",\"serverSentAt\":\"%s\"}",
+                commandId, request.getCommand(), now
         );
 
         //create message
@@ -117,5 +169,10 @@ public class MqttMessageHandlerService {
                 .build();
 
         mqttOutboundChannel.send(message);
-    }
+
+        cmd.setSentAt(Instant.now());
+        cmd.setStatus(CommandStatus.SENT);
+        commandRepository.save(cmd);
+    } // chức năng timeOut sẽ để lại cho tới khi hoàn thiện cơ bản các chức năng của dự án
+
 }

@@ -28,7 +28,6 @@ public class SecurityConfig {
             "/api/users",
             "/api/auth/login",
             "/api/auth/introspect",
-            "/api/auth/devices/sendMessage",
     };
 
     @Value("${jwt.secret-key}")

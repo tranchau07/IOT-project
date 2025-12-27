@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,10 @@ public class DeviceResponse {
     String id;
     String name;
     String type;
+    String ownerId;
+    List<String> authorizedUserIds;
     String roomId;
     String status; // ACTIVE / INACTIVE
     Instant lastCommunication;
+    Instant eventTime;
 }

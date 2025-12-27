@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.util.List;
 
 @Document(collection = "devices")
 @Data
@@ -17,6 +18,8 @@ public class Device {
     @Id
     String id;
     String name;
+    String ownerId;
+    List<String> authorizedUserIds;
     String type;
     String roomId;
     String status; // ACTIVE / INACTIVE
