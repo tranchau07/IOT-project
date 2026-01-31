@@ -1,11 +1,13 @@
 package com.example.Iot_Project.service;
 
 import com.example.Iot_Project.dto.request.SensorRequest;
+import com.example.Iot_Project.dto.response.DeviceResponse;
 import com.example.Iot_Project.dto.response.SensorResponse;
 import com.example.Iot_Project.enity.Sensor;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.SensorMapper;
+import com.example.Iot_Project.repository.DeviceRepository;
 import com.example.Iot_Project.repository.SensorRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.List;
 public class SensorService {
     SensorRepository sensorRepository;
     SensorMapper sensorMapper;
+    DeviceService deviceService;
 
     public SensorResponse create(SensorRequest request){
 
@@ -50,5 +53,7 @@ public class SensorService {
         sensorRepository.deleteById(id);
     }
 
-
+    public List<SensorResponse> getByDeviceId(String deviceId){
+        return sensorRepository.findByDeviceId(deviceId);
+    }
 }

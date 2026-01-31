@@ -1,5 +1,6 @@
 package com.example.Iot_Project.dto.response;
 
+import com.example.Iot_Project.enity.Role;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,5 +22,5 @@ public class UserResponse {
     String username;
     String phone;
     String email;
-    Set<String> roles;
+    Set<Role> roles;
 }

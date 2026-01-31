@@ -8,6 +8,7 @@ import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.enums.Role;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.UserMapper;
+import com.example.Iot_Project.repository.RoleRepository;
 import com.example.Iot_Project.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RoleRepository roleRepository;
 
 
     public UserResponse create(UserCreationRequest request) {
@@ -41,11 +43,11 @@ public class UserService {
 
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
-        user.setRoles(roles);
+//        user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
     }
-
+//    @PreAuthorize("hasAuthorized('AUTH_LOGIN')")
     public UserResponse getMyInfo(){
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user =  userRepository.findByUsername(userName).orElseThrow(() -> new AppException(ErrorCode.USER_DID_NOT_EXIST));
@@ -64,9 +66,13 @@ public class UserService {
 
     @PostAuthorize("returnObject.username==authentication.name")
     public UserResponse update(UserUpdateRequest request, String id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException(""));
+        User user = userRepository.findById(id).orElseThrow(()
+                -> new AppException(ErrorCode.USER_DID_NOT_EXIST));
 
         userMapper.updateUser(user, request);
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userMapper.toUserResponse(userRepository.save(user));
     }

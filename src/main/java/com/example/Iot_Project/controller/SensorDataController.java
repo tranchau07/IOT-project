@@ -48,14 +48,6 @@ public class SensorDataController {
                 .build();
     }
 
-    @DeleteMapping("/{id}")
-    ApiResponse<?> delete(@PathVariable String id){
-        sensorDataService.delete(id);
-        return ApiResponse.builder()
-                .result("This sensor data is deleted")
-                .build();
-    }
-
     @GetMapping("/{sensorId}/latest")
     public ApiResponse<List<SensorDataResponse>> getLatestData(
             @PathVariable String sensorId,

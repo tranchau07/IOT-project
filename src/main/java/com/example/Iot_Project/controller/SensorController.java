@@ -46,6 +46,14 @@ public class SensorController {
                 .build();
     }
 
+    @GetMapping("/device-id/{deviceId}")
+    ApiResponse<List<SensorResponse>> getByDeviceId(@PathVariable("deviceId") String deviceId){
+        return ApiResponse.<List<SensorResponse>>builder()
+                .result(sensorService.getByDeviceId(deviceId))
+                .build();
+    }
+
+
     @DeleteMapping("/{id}")
     ApiResponse<?> delete(@PathVariable String id){
         sensorService.delete(id);

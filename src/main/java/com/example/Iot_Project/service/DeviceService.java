@@ -35,7 +35,7 @@ public class DeviceService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_DID_NOT_EXIST));
 
         Device device = deviceMapper.toDevice(request);
-        device.setStatus(DeviceStatus.ACTIVE.name());
+        device.setStatus(DeviceStatus.ON.name());
         device.setOwnerId(user.getId());
 
         return deviceMapper.toDeviceResponse(deviceRepository.save(device));

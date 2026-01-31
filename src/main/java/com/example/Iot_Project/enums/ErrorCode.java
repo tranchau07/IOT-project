@@ -20,6 +20,11 @@ public enum ErrorCode {
     USER_DID_NOT_EXIST(1005, "User did not exist", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1006, "Unauthorized", HttpStatus.FORBIDDEN),
+    ROLE_EXISTED(2001, "Role is existed", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_EXISTED(2001, "Role is not existed", HttpStatus.BAD_REQUEST),
+
+    PERMISSION_EXISTED(2001, "Permission is existed", HttpStatus.BAD_REQUEST),
+
 
 
     //Topic exception

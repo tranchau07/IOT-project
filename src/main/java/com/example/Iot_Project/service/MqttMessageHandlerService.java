@@ -36,8 +36,6 @@ public class MqttMessageHandlerService {
     CommandRepository commandRepository;
     DeviceRepository deviceRepository;
 
-
-    WebSocketService webSocketService;
     MessageChannel mqttOutboundChannel;
     ObjectMapper objectMapper;
 
@@ -74,7 +72,7 @@ public class MqttMessageHandlerService {
 
         log.info("Parsed payload: {}", jsonNode);
 
-        webSocketService.broadCastSensorData(sensorDataRepository.save(sensorData));
+        sensorDataRepository.save(sensorData);
     }
 
     private void handleDeviceStatus(String topic, String payload) throws JsonProcessingException {
@@ -86,7 +84,7 @@ public class MqttMessageHandlerService {
         deviceRepository.findById(id).ifPresent(device -> {
             device.setStatus(status);
             device.setLastCommunication(Instant.now());
-            webSocketService.broadCastDeviceStatus(deviceRepository.save(device));
+           deviceRepository.save(device);
         });
     }
 
@@ -107,17 +105,26 @@ public class MqttMessageHandlerService {
         Command command = commandRepository.findById(response.getCommandId()).orElseThrow(()
                 -> new AppException(ErrorCode.COMMAND_NOT_EXISTED));
 
-        log.info("1");
         if (command.getStatus() == CommandStatus.SUCCESS
                 || command.getStatus() == CommandStatus.FAILED
                 || command.getStatus() == CommandStatus.TIMEOUT) {
             return;
         }
-        log.info("2");
 
         CommandStatus newStatus = mapToCommandStatus(CommandResponseStatus.valueOf(response.getStatus()));
 
         log.info(newStatus.toString());
+
+        if (newStatus == CommandStatus.SUCCESS && response.getStatus() != null) {
+            Device device = deviceRepository.findById(command.getDeviceId()).orElseThrow();
+            if(Objects.equals(device.getStatus(), DeviceStatus.ACTIVE.name()))
+                device.setStatus(DeviceStatus.INACTIVE.name());
+
+            device.setStatus(DeviceStatus.ACTIVE.name());
+
+            device.setLastCommunication(Instant.now());
+            deviceRepository.save(device);
+        }
 
         command.setStatus(newStatus);
         command.setResponsePayload(response);
@@ -167,6 +174,8 @@ public class MqttMessageHandlerService {
                 .setHeader(MqttHeaders.TOPIC, topic)
                 .setHeader(MqttHeaders.QOS, 1)
                 .build();
+
+        log.info(message.toString());
 
         mqttOutboundChannel.send(message);
 

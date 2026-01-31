@@ -1,7 +1,10 @@
 package com.example.Iot_Project.configuration;
 
+import com.example.Iot_Project.enity.Role;
 import com.example.Iot_Project.enity.User;
-import com.example.Iot_Project.enums.Role;
+import com.example.Iot_Project.enums.ErrorCode;
+import com.example.Iot_Project.exception.AppException;
+import com.example.Iot_Project.repository.RoleRepository;
 import com.example.Iot_Project.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +15,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Configuration
@@ -21,12 +26,14 @@ import java.util.HashSet;
 public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
     UserRepository userRepository;
+    RoleRepository roleRepository;
     @Bean
     ApplicationRunner applicationRunner(){
         return args -> {
           if(!userRepository.existsByUsername("admin")){
-            var roles = new HashSet<String>();
-            roles.add(Role.ADMIN.name());
+              Role role = roleRepository.findById("ADMIN").orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+              Set<Role> roles = new HashSet<>();
+              roles.add(role);
 
               User user = User.builder()
                       .username("admin")
