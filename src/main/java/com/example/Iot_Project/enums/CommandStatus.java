@@ -6,10 +6,11 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum CommandStatus {
-    CREATED,
+    CREATE,
     SENT,
     SUCCESS,
     FAILED,
+    REJECTED,
     TIMEOUT
     ;
 }

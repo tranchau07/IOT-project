@@ -1,0 +1,105 @@
+@startuml IoT System Overview
+!define AWSPUML https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v14.0/dist
+!include AWSPUML/AWSCommon.puml
+
+title IoT System - Architecture Overview
+
+skinparam ranksep 60
+skinparam nodesep 40
+
+rectangle "Mobile Device" as MobileApp {
+    component "React Native App" as App
+    component "AsyncStorage\n(JWT Token)" as Storage
+}
+
+rectangle "Network" {
+    cloud "Internet" as Internet
+}
+
+rectangle "Backend Services" {
+    component "Spring Boot Backend" as Backend
+    component "MQTT Inbound Handler" as MqttInbound
+    component "MQTT Outbound Handler" as MqttOutbound
+    component "WebSocket Handler" as WS
+    component "REST API Controller" as REST
+    component "Auth Service" as Auth
+    component "Device Status Publisher" as Publisher
+}
+
+rectangle "Message Broker" {
+    component "MQTT Broker\n(192.168.1.38:1883)" as Broker
+}
+
+rectangle "Data Storage" {
+    database "MySQL\n(Users, Devices, Commands, Metadata)" as MySQL
+    database "MongoDB\n(Sensor Data, Logs)" as MongoDB
+}
+
+rectangle "IoT Devices" {
+    component "ESP32 Device 1\n(Sensors, Relay)" as Device1
+    component "ESP32 Device 2\n(Sensors, Relay)" as Device2
+    component "ESP32 Device N" as DeviceN
+}
+
+' Connections
+App -->|REST API + JWT| REST
+REST -->|HTTP 200| App
+
+App -->|WebSocket| WS
+WS -->|Real-time updates| App
+
+App -->|MQTT (via Bridge)| Broker
+
+Device1 -->|MQTT (publish)| Broker
+Device2 -->|MQTT (publish)| Broker
+DeviceN -->|MQTT (publish)| Broker
+
+Broker -->|MQTT (subscribe)| MqttInbound
+Broker -->|MQTT (publish)| MqttOutbound
+MqttOutbound -->|commands| Device1
+MqttOutbound -->|commands| Device2
+MqttOutbound -->|commands| DeviceN
+
+MqttInbound -->|sensor data| MongoDB
+MqttInbound -->|device status| MySQL
+MqttInbound -->|notifications| WS
+
+REST -->|query/update| MySQL
+REST -->|query| MongoDB
+
+Auth -->|validate| MySQL
+
+Publisher -->|scheduled| Broker
+
+note right of Device1
+  Topics:
+  • devices/{id}/sensors/.../data (publish)
+  • devices/{id}/control (subscribe)
+  • devices/{id}/status (subscribe)
+  • devices/{id}/control/response (publish)
+end note
+
+note right of Broker
+  QoS: 1 (At-least-once)
+  Persistent connections
+  Multiple subscribers
+end note
+
+note right of MySQL
+  Tables:
+  • users
+  • devices
+  • sensors
+  • commands
+  • rooms
+  • roles
+end note
+
+note right of MongoDB
+  Collections:
+  • sensorData
+  • auditLog
+  • alerts
+end note
+
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+title Device Bootstrap & MQTT Initialization (Based on Actual ESP32 Code)
+
+participant "ESP32 Device" as Device
+participant "WiFi Network" as WiFi
+participant "NTP Server" as NTP
+participant "MQTT Broker" as Broker
+participant "Spring Boot Backend" as Backend
+
+autonumber
+
+== Boot ==
+
+Device -> Device: Serial.begin()
+Device -> Device: randomSeed()
+Device -> Device: Load WiFi credentials
+
+
+== WiFi Connection ==
+
+Device -> WiFi: WiFi.begin(ssid, password)
+
+loop Until WL_CONNECTED
+    WiFi -->> Device: Connection status
+end
+
+Device -> Device: Print IP address
+
+
+== NTP Setup ==
+
+Device -> NTP: Start NTP client
+NTP -->> Device: Sync UTC time (on demand)
+
+
+== MQTT Setup ==
+
+Device -> Broker: CONNECT (client_id, user, pass)
+alt Connected
+    Broker -->> Device: CONNACK
+else Failed
+    Device -> Device: Wait 5s and retry (reconnect loop)
+end
+
+
+== Topic Subscription ==
+
+Device -> Broker: SUBSCRIBE control topic
+Broker -->> Device: SUBACK
+
+Device -> Broker: SUBSCRIBE status topic
+Broker -->> Device: SUBACK
+
+
+== Normal Operation ==
+
+loop Main loop()
+
+    alt MQTT disconnected
+        Device -> Broker: Reconnect()
+    end
+
+    Device -> Broker: Keepalive (client.loop)
+
+    alt isActive == true (every 5 seconds)
+        Device -> Device: Generate sensor data
+        Device -> Broker: PUBLISH sensors/{id}/data
+    else isActive == false
+        Device -> Device: Skip sensor publish
+    end
+
+end
+
+
+== Incoming Messages ==
+
+Broker -> Device: Deliver control message
+Device -> Device: Parse JSON
+Device -> Broker: PUBLISH control/response (SUCCESS)
+
+Broker -> Device: Deliver status message
+Device -> Device: Update isActive flag
+
+@enduml

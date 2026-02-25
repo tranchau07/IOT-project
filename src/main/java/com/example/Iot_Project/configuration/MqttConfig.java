@@ -1,6 +1,6 @@
 package com.example.Iot_Project.configuration;
 
-import com.example.Iot_Project.enums.MqttTopics;
+import com.example.Iot_Project.enums.MqttTopicType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
-import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.channel.ExecutorChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.core.MessageProducer;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
@@ -20,11 +20,12 @@ import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 @EnableIntegration
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MqttConfig {
 
     @NonFinal
@@ -46,43 +47,56 @@ public class MqttConfig {
     @Bean
     public MqttPahoClientFactory mqttPahoClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
-        MqttConnectOptions options = new MqttConnectOptions();
 
-        options.setServerURIs(new String[]{SERVER_URI}); //8080
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setServerURIs(new String[]{SERVER_URI});
         options.setUserName(USERNAME);
         options.setPassword(PASSWORD.toCharArray());
-        options.setCleanSession(true);
-        options.setAutomaticReconnect(true); // Tự động kết nối lại khi mất kết nối
-        options.setConnectionTimeout(10); // Timeout 10 giây
-        options.setKeepAliveInterval(60);
+
+        // Production configuration
+        options.setCleanSession(false);          // Giữ session khi reconnect
+        options.setAutomaticReconnect(true);     // Tự reconnect
+        options.setConnectionTimeout(10);        // Timeout connect
+        options.setKeepAliveInterval(30);        // Ping mỗi 30s
+        options.setMaxInflight(200);             // Tăng số message song song
 
         factory.setConnectionOptions(options);
-
         return factory;
     }
-    //inbound / outbound
+
+    @Bean
+    public ThreadPoolTaskExecutor mqttTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("mqtt-worker-");
+        executor.initialize();
+        return executor;
+    }
 
     @Bean
     public MessageChannel mqttInputChannel() {
-        return new DirectChannel();
+        return new ExecutorChannel(mqttTaskExecutor());
     }
 
     @Bean
     public MessageChannel mqttOutboundChannel() {
-        return new DirectChannel();
+        return new ExecutorChannel(mqttTaskExecutor());
     }
 
     @Bean
     public MessageProducer inbound() {
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                CLIENT_ID + "_inbound",
-                mqttPahoClientFactory()
-        );
+        MqttPahoMessageDrivenChannelAdapter adapter =
+                new MqttPahoMessageDrivenChannelAdapter(
+                        CLIENT_ID + "_inbound",
+                        mqttPahoClientFactory()
+                );
+
         adapter.addTopic(
-                MqttTopics.DEVICE_CONTROL_RESPONSE.getTopic(),
-                MqttTopics.DEVICE_SENSOR_DATA.getTopic(),
-                MqttTopics.DEVICE_STATUS.getTopic(),
-                MqttTopics.DEVICE_HEARTBEAT.getTopic()
+                MqttTopicType.RESPONSE.getTopic(),
+                MqttTopicType.STATE.getTopic(),
+                MqttTopicType.SENSOR_READING.getTopic()
         );
 
         adapter.setCompletionTimeout(5000);
@@ -96,10 +110,12 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler handler = new MqttPahoMessageHandler(
-                CLIENT_ID + "_outbound",
-                mqttPahoClientFactory()
-        );
+
+        MqttPahoMessageHandler handler =
+                new MqttPahoMessageHandler(
+                        CLIENT_ID + "_outbound",
+                        mqttPahoClientFactory()
+                );
 
         handler.setAsync(true);
         handler.setDefaultQos(1);
@@ -107,6 +123,4 @@ public class MqttConfig {
 
         return handler;
     }
-
-
 }

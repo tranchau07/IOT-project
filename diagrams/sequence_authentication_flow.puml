@@ -1,0 +1,93 @@
+@startuml
+title Authentication Flow (Based on Actual AuthenticationService)
+
+actor User
+participant "React Native App" as App
+participant "AuthController" as Controller
+participant "AuthenticationService" as Service
+participant "UserRepository" as Repository
+participant "MySQL (Users)" as DB
+participant "JWT Generator (Nimbus)" as JWT
+participant "AsyncStorage" as Storage
+
+autonumber
+
+== Login Request ==
+
+User -> App: Enter username & password
+App -> Controller: POST /identity/api/auth/login
+activate Controller
+
+Controller -> Service: authenticate(request)
+activate Service
+
+
+== User Lookup ==
+
+Service -> Repository: findByUsername(username)
+activate Repository
+Repository -> DB: SELECT * FROM users WHERE username=?
+activate DB
+DB -->> Repository: User entity
+deactivate DB
+Repository -->> Service: Optional<User>
+deactivate Repository
+
+alt User not found
+    Service -> Controller: Throw USER_DID_NOT_EXIST
+    Controller -->> App: 401 Unauthorized
+    deactivate Service
+    deactivate Controller
+else User exists
+
+    Service -> Service: BCryptPasswordEncoder.matches()
+
+    alt Password incorrect
+        Service -> Controller: Throw UNAUTHENTICATED
+        Controller -->> App: 401 Unauthorized
+        deactivate Service
+        deactivate Controller
+    else Password correct
+
+        == JWT Creation ==
+
+        Service -> JWT: Build JWTClaimsSet
+        note right
+        Claims:
+        - sub = username
+        - iss = IOT.com
+        - iat = now
+        - exp = now + 1 hour
+        - scope = roles + permissions
+        end note
+
+        Service -> JWT: Sign with HS512 (SECRET_KEY)
+        JWT -->> Service: Serialized token
+
+        Service -->> Controller: AuthenticationResponse{token}
+        deactivate Service
+
+        Controller -->> App: 200 OK {token}
+        deactivate Controller
+
+    end
+end
+
+
+== Token Storage ==
+
+App -> Storage: setItem('@jwt_token', token)
+Storage -->> App: OK
+
+App -> App: Mark authenticated = true
+App -> App: Navigate to HomeScreen
+
+
+== Using Token in Requests ==
+
+App -> Controller: GET /api/devices
+note right
+Authorization: Bearer <JWT>
+end note
+
+@enduml

@@ -10,7 +10,7 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/IOT_MONGODB?authSource=admin
+      uri: mongodb://root:root@localhost:27017/hems_db?authSource=admin
 
   jpa:
     hibernate:
@@ -25,7 +25,7 @@ server:
 jwt:
   secret-key: "Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi"
 mqtt:
-  server-uri: "tcp://localhost:1883"
+  server-uri: "tcp://192.168.1.20:1883"
   username: "admin"
   password: "123456789"
-  client-id: "iot_project"
+  client-id: "iot_project_server"

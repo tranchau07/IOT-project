@@ -1,0 +1,58 @@
+@startuml
+title Scheduled Device Status Publish (Based on Actual Code)
+
+participant "Spring Scheduler" as Scheduler
+participant "DeviceStatusPublisher" as Publisher
+participant "DeviceRepository" as Repository
+participant "MQTT Broker" as Broker
+participant "ESP32 Device" as Device
+
+autonumber
+
+loop Every 10 seconds (@Scheduled fixedDelay)
+
+    Scheduler -> Publisher: publishDeviceStatusPeriodically()
+    activate Publisher
+
+    Publisher -> Repository: findAll()
+    activate Repository
+    Repository -->> Publisher: List<Device>
+    deactivate Repository
+
+    loop For each device
+
+        Publisher -> Publisher: Build JSON payload
+        note right
+        {
+          deviceId,
+          status
+        }
+        end note
+
+        Publisher -> Broker: PUBLISH devices/{id}/status
+        note right
+        QoS 1
+        end note
+
+        Broker -> Device: Deliver status message
+        activate Device
+
+        alt Device status == ACTIVE
+            Device -> Broker: PUBLISH sensor data
+            note right
+            Topic: devices/{id}/sensors/...
+            Payload: {temperature, humidity}
+            end note
+        else Device status != ACTIVE
+            Device -> Device: Ignore message
+        end
+
+        deactivate Device
+
+    end
+
+    deactivate Publisher
+
+end
+
+@enduml

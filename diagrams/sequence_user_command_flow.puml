@@ -1,0 +1,81 @@
+@startuml
+title User Command Execution (REST Polling Only)
+
+actor User
+participant "React Native App" as App
+participant "REST Controller" as API
+participant "Command Service" as Service
+participant "MySQL (Commands)" as DB
+participant "MQTT Broker" as Broker
+participant "ESP32 Device" as Device
+
+autonumber
+
+== User Action ==
+
+User -> App: Initiate Device Control (ON)
+activate App
+
+App -> API: POST /devices/{id}/on
+activate API
+
+API -> Service: createCommand(deviceId, action)
+activate Service
+
+Service -> DB: INSERT Command(status=CREATE)
+activate DB
+DB -->> Service: OK
+deactivate DB
+
+Service -> Broker: PUBLISH devices/{id}/control
+note right
+QoS 1
+Payload: {commandId, action}
+end note
+
+Service -> DB: UPDATE status = SENT
+DB -->> Service: OK
+
+Service -->> API: 202 Accepted
+deactivate Service
+
+API -->> App: HTTP 202 Accepted
+deactivate API
+
+
+== Device Execution (Async MQTT) ==
+
+Broker -> Device: Deliver control message
+activate Device
+
+Device -> Device: Execute action
+
+alt Execution success
+    Device -> Broker: PUBLISH response (SUCCESS)
+else Execution failed
+    Device -> Broker: PUBLISH response (FAILED)
+end
+
+deactivate Device
+
+
+== Backend Response Handling ==
+
+Broker -> Service: Deliver response
+activate Service
+
+Service -> DB: UPDATE status COMPLETED/FAILED
+DB -->> Service: OK
+
+deactivate Service
+
+
+App -> App: Component re-render triggered
+App -> API: GET /devices/{id}
+API -> DB: SELECT device state
+DB -->> API: Return updated device info
+API -->> App: Return device data
+
+App -> App: Update UI based on latest device state
+
+@enduml

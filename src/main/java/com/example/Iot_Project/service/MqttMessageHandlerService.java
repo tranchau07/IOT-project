@@ -1,15 +1,12 @@
 package com.example.Iot_Project.service;
 
-import com.example.Iot_Project.dto.request.CommandRequest;
-import com.example.Iot_Project.dto.response.CommandResponse;
-import com.example.Iot_Project.enity.Command;
-import com.example.Iot_Project.enity.Device;
-import com.example.Iot_Project.enity.SensorData;
+import com.example.Iot_Project.enity.*;
 import com.example.Iot_Project.enums.*;
 import com.example.Iot_Project.exception.AppException;
-import com.example.Iot_Project.repository.CommandRepository;
-import com.example.Iot_Project.repository.DeviceRepository;
-import com.example.Iot_Project.repository.SensorDataRepository;
+import com.example.Iot_Project.mapper.ControlLogMapper;
+import com.example.Iot_Project.repository.ClassroomRepository;
+import com.example.Iot_Project.repository.ControlLogRepository;
+import com.example.Iot_Project.repository.SensorReadingRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,6 +22,8 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -32,9 +31,10 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class MqttMessageHandlerService {
-    SensorDataRepository sensorDataRepository;
-    CommandRepository commandRepository;
-    DeviceRepository deviceRepository;
+    ClassroomRepository classroomRepository;
+    SensorReadingRepository sensorReadingRepository;
+    ControlLogMapper controlLogMapper;
+    ControlLogRepository controlLogRepository;
 
     MessageChannel mqttOutboundChannel;
     ObjectMapper objectMapper;
@@ -49,124 +49,137 @@ public class MqttMessageHandlerService {
                 topic,
                 payload
         );
-
-        MqttTopicType type = MqttTopicType.match(topic);
+        MqttTopic type = MqttTopic.match(topic);
         if(type == null) return;
 
         switch (type) {
-            case SENSOR_DATA -> handleSensorData(topic, payload);
-            case STATUS -> handleDeviceStatus(topic, payload);
-            case HEARTBEAT -> handleHeartbeat(topic);
-            case CONTROL_RESPONSE -> handleControlResponse(topic, payload);
+            case SENSOR_READING -> handleSensorReading(topic, payload);
+            case STATE -> handleDeviceState(topic, payload);
+            case RESPONSE -> handleControlResponse(topic, payload);
         }
     }
 
-    private void handleSensorData(String topic, String payload) throws JsonProcessingException {
+    private void handleHeartBeat(String id){
+        Classroom classroom = classroomRepository.findById(id).orElseThrow(() ->
+                new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
+        Device device = classroom.getDevice();
+        device.setLastSeen(Instant.now());
+
+        if(device.getConnectivity() == ConnectivityStatus.OFFLINE){
+            device.setConnectivity(ConnectivityStatus.ONLINE);
+            classroom.setDevice(device);
+        }
+
+        classroomRepository.save(classroom);
+    }
+
+    private void handleSensorReading(String topic, String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(payload);
-        Object value = objectMapper.convertValue(jsonNode.get("value"), Object.class);
-        SensorData sensorData = SensorData.builder()
-                .sensorId(jsonNode.get("sensorId").asText())
+        Environment environment = objectMapper.convertValue(jsonNode.get("environment"), Environment.class);
+        Double voltage = jsonNode.get("voltage").asDouble();
+
+        String[] parts = topic.split("/");
+        String classroomId = parts[2];
+        String deviceId = parts[3];
+
+        SensorReading sensorReading = SensorReading.builder()
+                .classroomId(classroomId)
+                .deviceId(deviceId)
+                .environment(environment)
                 .timestamp(Instant.now())
-                .value(value)
+                .voltage(voltage)
                 .build();
 
         log.info("Parsed payload: {}", jsonNode);
-
-        sensorDataRepository.save(sensorData);
+        handleHeartBeat(classroomId);
+        sensorReadingRepository.save(sensorReading);
     }
 
-    private void handleDeviceStatus(String topic, String payload) throws JsonProcessingException {
+    private void handleDeviceState(String topic, String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(payload);
+        PowerStatus power = PowerStatus.valueOf(jsonNode.get("power").asText());
 
-        String id = jsonNode.get("deviceId").asText();
-        String status = jsonNode.get("status").asText();
+        String[] parts = topic.split("/");
+        String deviceId = parts[3];
+        String classroomId = parts[2];
 
-        deviceRepository.findById(id).ifPresent(device -> {
-            device.setStatus(status);
-            device.setLastCommunication(Instant.now());
-           deviceRepository.save(device);
+        classroomRepository.findById(classroomId).ifPresent(classroom -> {
+            classroom.getDevice().setLastSeen(Instant.now());
+            classroom.getDevice().setPower(power);
+            classroomRepository.save(classroom);
         });
-    }
-
-    private void handleHeartbeat(String topic){
-        String deviceId = topic.split("/")[1];
-
-        deviceRepository.findById(deviceId).ifPresent(device -> {
-            device.setStatus(DeviceStatus.ACTIVE.name());
-            device.setLastCommunication(Instant.now());
-            deviceRepository.save(device);
-        });
+        handleHeartBeat(classroomId);
     }
 
     private void handleControlResponse(String topic, String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree((payload));
-        CommandResponse response =  objectMapper.treeToValue(jsonNode, CommandResponse.class);
+        String controlId = jsonNode.get("controlId").asText();
+        CommandStatus status = CommandStatus.valueOf(jsonNode.get("status").asText());
 
-        Command command = commandRepository.findById(response.getCommandId()).orElseThrow(()
-                -> new AppException(ErrorCode.COMMAND_NOT_EXISTED));
+        String[] parts = topic.split("/");
+        String deviceId = parts[3];
+        String classroomId = parts[2];
 
-        if (command.getStatus() == CommandStatus.SUCCESS
-                || command.getStatus() == CommandStatus.FAILED
-                || command.getStatus() == CommandStatus.TIMEOUT) {
+        Classroom classroom = classroomRepository.findById(classroomId).orElseThrow(() ->
+                new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
+
+        classroom.getDevice().setLastSeen(Instant.now());
+        classroom.getCurrentState().setLastUpdated(Instant.now());
+
+       ControlLog controlLog = controlLogRepository.findById(controlId).orElseThrow(() ->
+               new AppException(ErrorCode.CONTROL_LOG_NOT_EXISTED));
+
+       controlLog.getCommand().setLastUpdated(Instant.now());
+       controlLog.setStatus(status);
+
+        if (controlLog.getStatus() == CommandStatus.SUCCESS
+                || controlLog.getStatus() == CommandStatus.FAILED) {
             return;
         }
 
-        CommandStatus newStatus = mapToCommandStatus(CommandResponseStatus.valueOf(response.getStatus()));
+        controlLog.setStatus(status);
+        controlLog.setTimestamp(Instant.now());
 
-        log.info(newStatus.toString());
-
-        if (newStatus == CommandStatus.SUCCESS && response.getStatus() != null) {
-            Device device = deviceRepository.findById(command.getDeviceId()).orElseThrow();
-            if(Objects.equals(device.getStatus(), DeviceStatus.ACTIVE.name()))
-                device.setStatus(DeviceStatus.INACTIVE.name());
-
-            device.setStatus(DeviceStatus.ACTIVE.name());
-
-            device.setLastCommunication(Instant.now());
-            deviceRepository.save(device);
+        if (status == CommandStatus.SUCCESS) {
+            classroom.setCurrentState(controlLog.getCommand());
+            classroom.getCurrentState().setLastUpdated(Instant.now());
         }
 
-        command.setStatus(newStatus);
-        command.setResponsePayload(response);
-        command.setCompleteAt(Instant.now());
-        commandRepository.save(command);
+        controlLogRepository.save(controlLog);
+        classroomRepository.save(classroom);
+
+        log.info("Control {} updated to {}", controlId, status);
+
     }
 
-    private CommandStatus mapToCommandStatus(CommandResponseStatus responseStatus) {
-        return switch (responseStatus) {
-            case SUCCESS -> CommandStatus.SUCCESS;
-            case ERROR -> CommandStatus.FAILED;
-        };
+
+    private String buildPayload(String controlId,String classroomId, CurrentState state) throws JsonProcessingException {
+
+        Map<String, Object> payloadMap = new HashMap<>();
+        payloadMap.put("controlId", controlId);
+        payloadMap.put("classroomId", classroomId);
+
+        Map<String, Object> commandMap = new HashMap<>();
+        commandMap.put("acMode", state.getAcMode().name());
+        commandMap.put("acTemp", state.getAcTemp());
+        commandMap.put("lightStates", state.getLightStates());
+        commandMap.put("fanSpeed", state.getFanSpeed());
+        commandMap.put("power", state.getPower().name());
+
+        payloadMap.put("command", commandMap);
+
+        return objectMapper.writeValueAsString(payloadMap);
     }
 
-    public void sendControlCommand(String deviceId, CommandRequest request){
-        //topic
-        String topic = String.format("devices/%s/control", deviceId);
-        String commandId = "CMD_" + System.currentTimeMillis();
-        Instant now = Instant.now();
 
-        Device device = deviceRepository.findById(deviceId).orElseThrow(()
-                -> new AppException(ErrorCode.DEVICE_NOT_EXISTED));
+    public void sendControlCommand(String deviceId, String classroomId, String buildingName, ControlLog controlLog) throws JsonProcessingException {
 
-        if(device.getStatus().equals(DeviceStatus.INACTIVE.name()))
-            throw new AppException(ErrorCode.DEVICE_OFFLINE);
+        String topic = String.format("hust/%s/%s/%s/down/control", buildingName, classroomId, deviceId);
 
-        Command cmd = Command.builder()
-                .id(commandId)
-                .command(request.getCommand())
-                .deviceId(deviceId)
-                .requestAt(request.getRequestAt())
-                .createAt(now)
-                .status(CommandStatus.CREATED)
-                .build();
-
-        commandRepository.save(cmd);
+        ControlLog created = controlLogRepository.save(controlLog);
         //payload
 
-        String payload = String.format(
-                "{\"commandId\":\"%s\",\"command\":\"%s\",\"serverSentAt\":\"%s\"}",
-                commandId, request.getCommand(), now
-        );
+        String payload = buildPayload(created.getId() ,classroomId, controlLog.getCommand());
 
         //create message
         Message<?> message = MessageBuilder
@@ -177,11 +190,16 @@ public class MqttMessageHandlerService {
 
         log.info(message.toString());
 
-        mqttOutboundChannel.send(message);
+        boolean sent = mqttOutboundChannel.send(message);
 
-        cmd.setSentAt(Instant.now());
-        cmd.setStatus(CommandStatus.SENT);
-        commandRepository.save(cmd);
-    } // chức năng timeOut sẽ để lại cho tới khi hoàn thiện cơ bản các chức năng của dự án
-
+        if (sent) {
+            created.setStatus(CommandStatus.SENT);
+            created.setTimestamp(Instant.now());
+            controlLogRepository.save(created);
+        } else {
+            created.setStatus(CommandStatus.FAILED);
+            controlLogRepository.save(created);
+            log.error("MQTT send failed for command {}", created.getId());
+        }
+    }
 }
