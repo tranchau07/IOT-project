@@ -20,11 +20,11 @@ public interface SensorReadingRepository extends MongoRepository<SensorReading, 
 
 
     @Aggregation(pipeline = {
-            "{ $match: { classroomId: ?0, timestamp: { $gte: ?1 }, 'environment.occupancy': { $gt: 0 } } }",
+            "{ $match: { classroomId: ?0, 'environment.occupancy': { $gt: 0 } } }",
             "{ $sort: { timestamp: -1 } }",
             "{ $limit: 1 }"
     })
-    Instant findLastOccupiedTime(String classroomId);
+    Optional<SensorReading> findLastOccupiedReading(String classroomId);
 
     @Aggregation(pipeline = {
             "{ $match: { classroomId: ?0, timestamp: { $gte: ?1 } } }",

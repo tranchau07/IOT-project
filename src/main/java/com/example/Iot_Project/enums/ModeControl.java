@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public enum ModeControl {
     MANUAL,
     SCHEDULE,
-    EMERGENCY
+    EMERGENCY,
+    AUTOMATIC
 }

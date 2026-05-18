@@ -9,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 public enum Reason {
-    TEMP_HIGH,
     ROOM_EMPTY,
-    OCCUPANCY_LOW,
     SCHEDULE_START,
-    MANUAL_OVERRIDE
+    SCHEDULE_END,
+    MANUAL_OVERRIDE,
+    SAFETY_VOLTAGE
 }

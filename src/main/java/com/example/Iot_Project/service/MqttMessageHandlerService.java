@@ -50,7 +50,7 @@ public class MqttMessageHandlerService {
                 payload
         );
         MqttTopic type = MqttTopic.match(topic);
-        if(type == null) return;
+        if (type == null) return;
 
         switch (type) {
             case SENSOR_READING -> handleSensorReading(topic, payload);
@@ -59,13 +59,13 @@ public class MqttMessageHandlerService {
         }
     }
 
-    private void handleHeartBeat(String id){
+    private void handleHeartBeat(String id) {
         Classroom classroom = classroomRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
         Device device = classroom.getDevice();
         device.setLastSeen(Instant.now());
 
-        if(device.getConnectivity() == ConnectivityStatus.OFFLINE){
+        if (device.getConnectivity() == ConnectivityStatus.OFFLINE) {
             device.setConnectivity(ConnectivityStatus.ONLINE);
             classroom.setDevice(device);
         }
@@ -112,48 +112,46 @@ public class MqttMessageHandlerService {
     }
 
     private void handleControlResponse(String topic, String payload) throws JsonProcessingException {
-        JsonNode jsonNode = objectMapper.readTree((payload));
+
+        JsonNode jsonNode = objectMapper.readTree(payload);
+
         String controlId = jsonNode.get("controlId").asText();
         CommandStatus status = CommandStatus.valueOf(jsonNode.get("status").asText());
 
         String[] parts = topic.split("/");
-        String deviceId = parts[3];
         String classroomId = parts[2];
 
-        Classroom classroom = classroomRepository.findById(classroomId).orElseThrow(() ->
-                new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
 
-        classroom.getDevice().setLastSeen(Instant.now());
-        classroom.getCurrentState().setLastUpdated(Instant.now());
+        ControlLog controlLog = controlLogRepository.findById(controlId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONTROL_LOG_NOT_EXISTED));
 
-       ControlLog controlLog = controlLogRepository.findById(controlId).orElseThrow(() ->
-               new AppException(ErrorCode.CONTROL_LOG_NOT_EXISTED));
-
-       controlLog.getCommand().setLastUpdated(Instant.now());
-       controlLog.setStatus(status);
-
-        if (controlLog.getStatus() == CommandStatus.SUCCESS
-                || controlLog.getStatus() == CommandStatus.FAILED) {
+        if (controlLog.getStatus() == CommandStatus.SUCCESS ||
+                controlLog.getStatus() == CommandStatus.FAILED) {
+            log.info("Control {} already finalized with status {}", controlId, controlLog.getStatus());
             return;
         }
 
         controlLog.setStatus(status);
         controlLog.setTimestamp(Instant.now());
+        controlLog.getCommand().setLastUpdated(Instant.now());
 
         if (status == CommandStatus.SUCCESS) {
             classroom.setCurrentState(controlLog.getCommand());
             classroom.getCurrentState().setLastUpdated(Instant.now());
         }
 
+        classroom.getDevice().setLastSeen(Instant.now());
+
         controlLogRepository.save(controlLog);
         classroomRepository.save(classroom);
 
         log.info("Control {} updated to {}", controlId, status);
-
     }
 
 
-    private String buildPayload(String controlId,String classroomId, CurrentState state) throws JsonProcessingException {
+    private String buildPayload(String controlId, String classroomId, CurrentState state) throws JsonProcessingException {
 
         Map<String, Object> payloadMap = new HashMap<>();
         payloadMap.put("controlId", controlId);
@@ -179,7 +177,7 @@ public class MqttMessageHandlerService {
         ControlLog created = controlLogRepository.save(controlLog);
         //payload
 
-        String payload = buildPayload(created.getId() ,classroomId, controlLog.getCommand());
+        String payload = buildPayload(created.getId(), classroomId, controlLog.getCommand());
 
         //create message
         Message<?> message = MessageBuilder
