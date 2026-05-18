@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 @Getter
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
 
@@ -40,4 +39,10 @@ public enum ErrorCode {
     int code;
     String message;
     HttpStatusCode statusCode;
+
+    ErrorCode(int code, String message, HttpStatusCode statusCode) {
+        this.code = code;
+        this.message = message;
+        this.statusCode = statusCode;
+    }
 }

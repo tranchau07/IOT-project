@@ -1,13 +1,13 @@
 package com.example.Iot_Project.service;
 
+import com.example.Iot_Project.document.Classroom;
 import com.example.Iot_Project.dto.request.ClassroomRequest;
 import com.example.Iot_Project.dto.response.ClassroomResponse;
-import com.example.Iot_Project.enity.Classroom;
-import com.example.Iot_Project.enity.CurrentState;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.ClassroomMapper;
-import com.example.Iot_Project.repository.ClassroomRepository;
+import com.example.Iot_Project.model.CurrentState;
+import com.example.Iot_Project.repository.mongo.ClassroomRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

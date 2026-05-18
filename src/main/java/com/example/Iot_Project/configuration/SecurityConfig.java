@@ -33,10 +33,17 @@ public class SecurityConfig {
             "/api/users",
             "/api/auth/login",
             "/api/auth/introspect",
+            // Public endpoints for Swagger UI
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
+
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -44,6 +51,11 @@ public class SecurityConfig {
         httpSecurity
                 .cors(cors -> {})
                 .authorizeHttpRequests(registry -> registry
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
                 .anyRequest().authenticated());
@@ -89,8 +101,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8081",
-                "http://192.168.1.20:8081"));
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

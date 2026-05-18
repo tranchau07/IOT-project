@@ -1,6 +1,6 @@
-package com.example.Iot_Project.repository;
+package com.example.Iot_Project.repository.mongo;
 
-import com.example.Iot_Project.enity.ControlLog;
+import com.example.Iot_Project.document.ControlLog;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.Instant;

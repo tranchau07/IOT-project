@@ -1,9 +1,10 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.document;
 
 import com.example.Iot_Project.enums.CommandStatus;
 import com.example.Iot_Project.enums.IssueBy;
 import com.example.Iot_Project.enums.ModeControl;
 import com.example.Iot_Project.enums.Reason;
+import com.example.Iot_Project.model.CurrentState;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

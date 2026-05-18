@@ -1,8 +1,8 @@
-package com.example.Iot_Project.repository;
+package com.example.Iot_Project.repository.jpa;
 
 
-import com.example.Iot_Project.enity.Permission;
-import com.example.Iot_Project.enity.User;
+import com.example.Iot_Project.entity.Permission;
+import com.example.Iot_Project.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

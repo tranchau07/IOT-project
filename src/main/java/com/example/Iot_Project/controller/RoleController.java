@@ -22,21 +22,21 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping("")
-    ApiResponse<RoleResponse> create(@RequestBody RoleRequest request){
+    public ApiResponse<RoleResponse> create(@RequestBody RoleRequest request){
         return ApiResponse.<RoleResponse>builder()
                 .result(roleService.create(request))
                 .build();
     }
 
     @GetMapping
-    ApiResponse<List<RoleResponse>> getListPerMission(){
+    public ApiResponse<List<RoleResponse>> getListPerMission(){
         return ApiResponse.<List<RoleResponse>>builder()
                 .result(roleService.getListRole())
                 .build();
     }
 
     @DeleteMapping("/{name}")
-    ApiResponse<?> delete(@PathVariable("name") String name){
+    public ApiResponse<?> delete(@PathVariable("name") String name){
         roleService.delete(name);
         return ApiResponse.builder()
                 .build();

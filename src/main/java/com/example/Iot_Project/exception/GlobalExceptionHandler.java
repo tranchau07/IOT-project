@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Objects;
 
-@ControllerAdvice
+//@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)

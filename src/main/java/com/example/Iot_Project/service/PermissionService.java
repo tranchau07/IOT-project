@@ -2,11 +2,11 @@ package com.example.Iot_Project.service;
 
 import com.example.Iot_Project.dto.request.PermissionRequest;
 import com.example.Iot_Project.dto.response.PermissionResponse;
-import com.example.Iot_Project.enity.Permission;
+import com.example.Iot_Project.entity.Permission;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.PermissionMapper;
-import com.example.Iot_Project.repository.PermissionRepository;
+import com.example.Iot_Project.repository.jpa.PermissionRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

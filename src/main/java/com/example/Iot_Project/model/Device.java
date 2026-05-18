@@ -1,4 +1,4 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.model;
 
 import com.example.Iot_Project.enums.ConnectivityStatus;
 import com.example.Iot_Project.enums.DeviceType;

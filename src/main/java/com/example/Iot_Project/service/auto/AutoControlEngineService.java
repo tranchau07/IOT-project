@@ -1,9 +1,14 @@
-    package com.example.Iot_Project.service.auto;
+package com.example.Iot_Project.service.auto;
 
-    import com.example.Iot_Project.enity.*;
+    import com.example.Iot_Project.document.Classroom;
+    import com.example.Iot_Project.document.ControlLog;
+    import com.example.Iot_Project.document.SensorReading;
     import com.example.Iot_Project.enums.*;
-    import com.example.Iot_Project.repository.ClassroomRepository;
-    import com.example.Iot_Project.repository.SensorReadingRepository;
+    import com.example.Iot_Project.model.CurrentState;
+    import com.example.Iot_Project.model.Device;
+    import com.example.Iot_Project.model.Schedule;
+    import com.example.Iot_Project.repository.mongo.ClassroomRepository;
+    import com.example.Iot_Project.repository.mongo.SensorReadingRepository;
     import com.example.Iot_Project.service.MqttMessageHandlerService;
     import com.fasterxml.jackson.core.JsonProcessingException;
     import lombok.AccessLevel;

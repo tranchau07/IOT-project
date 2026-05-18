@@ -2,7 +2,7 @@ package com.example.Iot_Project.mapper;
 
 import com.example.Iot_Project.dto.request.ControlLogRequest;
 import com.example.Iot_Project.dto.response.ControlLogResponse;
-import com.example.Iot_Project.enity.ControlLog;
+import com.example.Iot_Project.document.ControlLog;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

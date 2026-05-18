@@ -2,12 +2,12 @@ package com.example.Iot_Project.service;
 
 import com.example.Iot_Project.dto.request.RoleRequest;
 import com.example.Iot_Project.dto.response.RoleResponse;
-import com.example.Iot_Project.enity.Role;
+import com.example.Iot_Project.entity.Role;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.RoleMapper;
-import com.example.Iot_Project.repository.PermissionRepository;
-import com.example.Iot_Project.repository.RoleRepository;
+import com.example.Iot_Project.repository.jpa.PermissionRepository;
+import com.example.Iot_Project.repository.jpa.RoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

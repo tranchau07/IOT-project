@@ -1,5 +1,9 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.document;
 
+import com.example.Iot_Project.model.Config;
+import com.example.Iot_Project.model.CurrentState;
+import com.example.Iot_Project.model.Device;
+import com.example.Iot_Project.model.Schedule;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

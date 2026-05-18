@@ -30,14 +30,14 @@ public class SensorReadingController {
     }
 
     @GetMapping("/limit-20/{id}")
-    ApiResponse<List<SensorReadingResponse>> get20ByClassroomIdOrderByTimeStamp(@PathVariable("id") String id){
+    public ApiResponse<List<SensorReadingResponse>> get20ByClassroomIdOrderByTimeStamp(@PathVariable("id") String id){
         return ApiResponse.<List<SensorReadingResponse>>builder()
                 .result(sensorReadingService.get20ByClassroomIdOrderByTimeStamp(id))
                 .build();
     }
 
     @GetMapping("/latest/{id}")
-    ApiResponse<SensorReadingResponse> get(@PathVariable("id") String id){
+    public ApiResponse<SensorReadingResponse> get(@PathVariable("id") String id){
         return ApiResponse.<SensorReadingResponse>builder()
                 .result(sensorReadingService.getByClassroomIdLatestOrderByTimestampDesc(id))
                 .build();

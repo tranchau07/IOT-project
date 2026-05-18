@@ -1,5 +1,6 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.document;
 
+import com.example.Iot_Project.model.Environment;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

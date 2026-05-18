@@ -1,6 +1,6 @@
 package com.example.Iot_Project.dto.request;
 
-import com.example.Iot_Project.enity.*;
+import com.example.Iot_Project.model.Environment;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

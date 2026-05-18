@@ -1,4 +1,4 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,11 +12,15 @@ import java.util.Set;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class Role {
-    @Id
-    String name;
-    String description;
+public class User {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
+    String username;
+    String password;
+    String phone;
+    String email;
     @ManyToMany
-    Set<Permission> permissions;
+    Set<Role> roles;
 }

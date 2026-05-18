@@ -2,7 +2,7 @@ package com.example.Iot_Project.mapper;
 
 import com.example.Iot_Project.dto.request.ClassroomRequest;
 import com.example.Iot_Project.dto.response.ClassroomResponse;
-import com.example.Iot_Project.enity.Classroom;
+import com.example.Iot_Project.document.Classroom;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

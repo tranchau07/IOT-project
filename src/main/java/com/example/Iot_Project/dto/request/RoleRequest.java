@@ -1,6 +1,6 @@
 package com.example.Iot_Project.dto.request;
 
-import com.example.Iot_Project.enity.Permission;
+import com.example.Iot_Project.entity.Permission;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;

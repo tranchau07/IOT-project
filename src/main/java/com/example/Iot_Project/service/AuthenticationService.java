@@ -3,10 +3,10 @@ package com.example.Iot_Project.service;
 
 import com.example.Iot_Project.dto.request.AuthenticationRequest;
 import com.example.Iot_Project.dto.response.AuthenticationResponse;
-import com.example.Iot_Project.enity.User;
+import com.example.Iot_Project.entity.User;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
-import com.example.Iot_Project.repository.UserRepository;
+import com.example.Iot_Project.repository.jpa.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -39,6 +39,14 @@ public class AuthenticationService {
     @Value("${jwt.secret-key}")
     String SECRET_KEY;
 
+    @NonFinal
+    @Value("${jwt.expiration-hours}")
+    long expirationHours;
+
+    @NonFinal
+    @Value("${jwt.issuer}")
+    String issuer;
+
     public AuthenticationResponse authenticate(AuthenticationRequest request){
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_DID_NOT_EXIST));
@@ -58,9 +66,9 @@ public class AuthenticationService {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
-                .issuer("IOT.com")
+                .issuer(issuer)
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(expirationHours, ChronoUnit.HOURS).toEpochMilli()))
                 .claim("scope", buildScope(user))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());

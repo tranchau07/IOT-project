@@ -5,8 +5,8 @@ import com.example.Iot_Project.dto.request.UserCreationRequest;
 import com.example.Iot_Project.dto.request.UserUpdateRequest;
 import com.example.Iot_Project.dto.response.PermissionResponse;
 import com.example.Iot_Project.dto.response.UserResponse;
-import com.example.Iot_Project.enity.Permission;
-import com.example.Iot_Project.enity.User;
+import com.example.Iot_Project.entity.Permission;
+import com.example.Iot_Project.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

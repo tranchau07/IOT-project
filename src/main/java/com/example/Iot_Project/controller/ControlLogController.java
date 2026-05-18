@@ -22,7 +22,7 @@ public class ControlLogController {
     ControlLogService controlLogService;
 
     @GetMapping("/between/{id}")
-    ApiResponse<List<ControlLogResponse>> getListBetweenTimeStamp(
+    public ApiResponse<List<ControlLogResponse>> getListBetweenTimeStamp(
             @PathVariable String id,
             @RequestParam Instant start,
             @RequestParam Instant end
@@ -33,7 +33,7 @@ public class ControlLogController {
     }
 
     @PostMapping("/send/control")
-    ApiResponse<?> senControlResponse(@RequestBody ControlLogRequest controlLogRequest) throws JsonProcessingException {
+    public ApiResponse<?> senControlResponse(@RequestBody ControlLogRequest controlLogRequest) throws JsonProcessingException {
         controlLogService.sendControlLog(controlLogRequest);
         return ApiResponse.builder()
                 .build();

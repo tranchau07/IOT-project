@@ -1,7 +1,7 @@
-package com.example.Iot_Project.repository;
+package com.example.Iot_Project.repository.mongo;
 
-import com.example.Iot_Project.enity.Classroom;
-import com.example.Iot_Project.enity.Device;
+import com.example.Iot_Project.document.Classroom;
+import com.example.Iot_Project.model.Device;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

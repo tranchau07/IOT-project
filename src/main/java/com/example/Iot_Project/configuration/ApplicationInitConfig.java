@@ -1,11 +1,11 @@
 package com.example.Iot_Project.configuration;
 
-import com.example.Iot_Project.enity.Role;
-import com.example.Iot_Project.enity.User;
+import com.example.Iot_Project.entity.Role;
+import com.example.Iot_Project.entity.User;
 import com.example.Iot_Project.enums.ErrorCode;
 import com.example.Iot_Project.exception.AppException;
-import com.example.Iot_Project.repository.RoleRepository;
-import com.example.Iot_Project.repository.UserRepository;
+import com.example.Iot_Project.repository.jpa.RoleRepository;
+import com.example.Iot_Project.repository.jpa.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

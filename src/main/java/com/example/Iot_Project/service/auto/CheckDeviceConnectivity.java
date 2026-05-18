@@ -1,8 +1,8 @@
 package com.example.Iot_Project.service.auto;
 
-import com.example.Iot_Project.enity.Classroom;
+import com.example.Iot_Project.document.Classroom;
 import com.example.Iot_Project.enums.ConnectivityStatus;
-import com.example.Iot_Project.repository.ClassroomRepository;
+import com.example.Iot_Project.repository.mongo.ClassroomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

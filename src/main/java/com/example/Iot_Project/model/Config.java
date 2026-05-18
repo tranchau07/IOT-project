@@ -1,4 +1,4 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

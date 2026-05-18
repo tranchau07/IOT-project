@@ -1,6 +1,6 @@
 package com.example.Iot_Project.dto.request;
 
-import com.example.Iot_Project.enity.CurrentState;
+import com.example.Iot_Project.model.CurrentState;
 import com.example.Iot_Project.enums.CommandStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

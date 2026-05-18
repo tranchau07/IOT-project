@@ -1,6 +1,6 @@
 package com.example.Iot_Project.dto.response;
 
-import com.example.Iot_Project.enity.Permission;
+import com.example.Iot_Project.entity.Permission;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

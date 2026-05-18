@@ -1,4 +1,4 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.model;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Schedule {
-    String startTime;
-    String endTime;
-    Integer dayOfWeek;
+public class Energy {
+    Double totalKw;
+    Double energyKwh;
 }

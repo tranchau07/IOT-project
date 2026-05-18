@@ -1,14 +1,14 @@
 package com.example.Iot_Project.service;
 
+import com.example.Iot_Project.document.Classroom;
+import com.example.Iot_Project.document.ControlLog;
 import com.example.Iot_Project.dto.request.ControlLogRequest;
 import com.example.Iot_Project.dto.response.ControlLogResponse;
-import com.example.Iot_Project.enity.Classroom;
-import com.example.Iot_Project.enity.ControlLog;
 import com.example.Iot_Project.enums.*;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.ControlLogMapper;
-import com.example.Iot_Project.repository.ClassroomRepository;
-import com.example.Iot_Project.repository.ControlLogRepository;
+import com.example.Iot_Project.repository.mongo.ClassroomRepository;
+import com.example.Iot_Project.repository.mongo.ControlLogRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

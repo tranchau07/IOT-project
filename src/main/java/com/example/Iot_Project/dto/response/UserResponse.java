@@ -1,6 +1,6 @@
 package com.example.Iot_Project.dto.response;
 
-import com.example.Iot_Project.enity.Role;
+import com.example.Iot_Project.entity.Role;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;

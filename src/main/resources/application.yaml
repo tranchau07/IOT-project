@@ -3,29 +3,46 @@ spring:
     name: Iot-Project
 
   datasource:
-    url: "jdbc:mysql://localhost:3306/identity_service"
-    username: root
-    password: 1234
+    url: ${DB_URL:jdbc:mysql://localhost:3306/identity_service}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/hems_db?authSource=admin
+      uri: ${MONGO_URI:mongodb://root:root@localhost:27017/hems_db?authSource=admin}
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    show-sql: ${JPA_SHOW_SQL:false}
 
 server:
   address: 0.0.0.0
   port: 8080
-  servlet:
-    context-path: /identity
+
 jwt:
-  secret-key: "Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi"
+  secret-key: ${JWT_SECRET:Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi}
+  expiration-hours: ${JWT_EXPIRATION_HOURS:1}
+  issuer: ${JWT_ISSUER:IOT.com}
+
 mqtt:
-  server-uri: "tcp://192.168.1.2:1883"
-  username: "admin"
-  password: "123456789"
-  client-id: "iot_project_server"
+  server-uri: ${MQTT_SERVER_URI:tcp://localhost:1883}
+  username: ${MQTT_USERNAME:admin}
+  password: ${MQTT_PASSWORD:123456789}
+  client-id: ${MQTT_CLIENT_ID:iot_project_server}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081}
+
+logging:
+  level:
+    root: INFO
+    com.example.Iot_Project: INFO
+    org.springdoc: DEBUG
+  file:
+    name: logs/application.log
+  logback:
+    rolling policy:
+      max-history: 30
+      max-file-size: 10MB

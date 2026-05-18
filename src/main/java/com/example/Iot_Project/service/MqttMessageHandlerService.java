@@ -1,12 +1,16 @@
 package com.example.Iot_Project.service;
 
-import com.example.Iot_Project.enity.*;
+import com.example.Iot_Project.document.Classroom;
+import com.example.Iot_Project.document.ControlLog;
+import com.example.Iot_Project.document.SensorReading;
 import com.example.Iot_Project.enums.*;
 import com.example.Iot_Project.exception.AppException;
 import com.example.Iot_Project.mapper.ControlLogMapper;
-import com.example.Iot_Project.repository.ClassroomRepository;
-import com.example.Iot_Project.repository.ControlLogRepository;
-import com.example.Iot_Project.repository.SensorReadingRepository;
+import com.example.Iot_Project.model.Device;
+import com.example.Iot_Project.model.Environment;
+import com.example.Iot_Project.repository.mongo.ClassroomRepository;
+import com.example.Iot_Project.repository.mongo.ControlLogRepository;
+import com.example.Iot_Project.repository.mongo.SensorReadingRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -151,7 +155,7 @@ public class MqttMessageHandlerService {
     }
 
 
-    private String buildPayload(String controlId, String classroomId, CurrentState state) throws JsonProcessingException {
+    private String buildPayload(String controlId, String classroomId, com.example.Iot_Project.model.CurrentState state) throws JsonProcessingException {
 
         Map<String, Object> payloadMap = new HashMap<>();
         payloadMap.put("controlId", controlId);

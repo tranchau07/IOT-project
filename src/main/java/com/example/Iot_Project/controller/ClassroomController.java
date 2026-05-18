@@ -18,38 +18,37 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ClassroomController {
     ClassroomService classroomService;
-    ClassroomMapper classroomMapper;
 
     @PostMapping("")
-    ApiResponse<ClassroomResponse> create(@RequestBody ClassroomRequest request){
+    public ApiResponse<ClassroomResponse> create(@RequestBody ClassroomRequest request){
         return ApiResponse.<ClassroomResponse>builder()
                 .result(classroomService.create(request))
                 .build();
     }
 
     @GetMapping("")
-    ApiResponse<List<ClassroomResponse>> getList(){
+    public ApiResponse<List<ClassroomResponse>> getList(){
         return ApiResponse.<List<ClassroomResponse>>builder()
                 .result(classroomService.getList())
                 .build();
     }
 
     @GetMapping("/{id}")
-    ApiResponse<ClassroomResponse> getById(@PathVariable("id") String id){
+    public ApiResponse<ClassroomResponse> getById(@PathVariable("id") String id){
         return ApiResponse.<ClassroomResponse>builder()
                 .result(classroomService.getById(id))
                 .build();
     }
 
     @PutMapping("/{id}")
-    ApiResponse<ClassroomResponse> update(@RequestBody ClassroomRequest request, @PathVariable("id") String id){
+    public ApiResponse<ClassroomResponse> update(@RequestBody ClassroomRequest request, @PathVariable("id") String id){
         return ApiResponse.<ClassroomResponse>builder()
                 .result(classroomService.update(request, id))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<?> delete(@PathVariable String id){
+    public ApiResponse<?> delete(@PathVariable String id){
         return ApiResponse.builder().build();
     }
 }

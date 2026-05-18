@@ -1,4 +1,4 @@
-package com.example.Iot_Project.enity;
+package com.example.Iot_Project.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

@@ -1,6 +1,6 @@
-package com.example.Iot_Project.repository;
+package com.example.Iot_Project.repository.mongo;
 
-import com.example.Iot_Project.enity.SensorReading;
+import com.example.Iot_Project.document.SensorReading;
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

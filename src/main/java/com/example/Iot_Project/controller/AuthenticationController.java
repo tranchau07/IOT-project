@@ -27,14 +27,14 @@ public class AuthenticationController {
     IntrospectService introspectService;
 
     @PostMapping("/login")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
+    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(authenticationService.authenticate(request))
                 .build();
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
+    public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         return ApiResponse.<IntrospectResponse>builder()
                 .result(introspectService.introspect(request))
                 .build();

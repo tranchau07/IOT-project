@@ -4,7 +4,7 @@ import com.example.Iot_Project.dto.request.UserCreationRequest;
 import com.example.Iot_Project.dto.request.UserUpdateRequest;
 import com.example.Iot_Project.dto.response.ApiResponse;
 import com.example.Iot_Project.dto.response.UserResponse;
-import com.example.Iot_Project.enity.User;
+import com.example.Iot_Project.entity.User;
 import com.example.Iot_Project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -22,33 +22,33 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<UserResponse> create(@RequestBody @Valid UserCreationRequest request){
+    public ApiResponse<UserResponse> create(@RequestBody @Valid UserCreationRequest request){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.create(request))
                 .build();
     }
 
     @GetMapping
-    List<UserResponse> getAllUsers(){
+    public List<UserResponse> getAllUsers(){
         return userService.getAll();
     }
 
     @GetMapping("/{userId}")
-    ApiResponse<UserResponse> getById(@PathVariable("userId") String id){
+    public ApiResponse<UserResponse> getById(@PathVariable("userId") String id){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getByID(id))
                 .build();
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> update(@RequestBody UserUpdateRequest request,@PathVariable("userId") String id){
+    public ApiResponse<UserResponse> update(@RequestBody UserUpdateRequest request,@PathVariable("userId") String id){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.update(request, id))
                 .build();
     }
 
     @DeleteMapping("/{userId}")
-    ApiResponse<String> deleteById(@PathVariable("userId") String id){
+    public ApiResponse<String> deleteById(@PathVariable("userId") String id){
         userService.deleteById(id);
         return ApiResponse.<String>builder()
                 .result("User with id:" + id + " is deleted")
@@ -56,7 +56,7 @@ public class UserController {
     }
 
     @GetMapping("/myInfo")
-    ApiResponse<UserResponse> getMyInfo(){
+    public ApiResponse<UserResponse> getMyInfo(){
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();

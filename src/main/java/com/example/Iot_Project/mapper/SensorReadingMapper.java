@@ -2,7 +2,7 @@ package com.example.Iot_Project.mapper;
 
 import com.example.Iot_Project.dto.request.SensorReadingRequest;
 import com.example.Iot_Project.dto.response.SensorReadingResponse;
-import com.example.Iot_Project.enity.SensorReading;
+import com.example.Iot_Project.document.SensorReading;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 

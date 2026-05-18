@@ -1,10 +1,10 @@
 package com.example.Iot_Project.service;
 
+import com.example.Iot_Project.document.SensorReading;
 import com.example.Iot_Project.dto.request.SensorReadingRequest;
 import com.example.Iot_Project.dto.response.SensorReadingResponse;
-import com.example.Iot_Project.enity.SensorReading;
 import com.example.Iot_Project.mapper.SensorReadingMapper;
-import com.example.Iot_Project.repository.SensorReadingRepository;
+import com.example.Iot_Project.repository.mongo.SensorReadingRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
