@@ -29,4 +29,10 @@ public class Classroom {
     Config config;
     CurrentState currentState;
     Instant createdAt;
+
+    @Builder.Default
+    boolean faultLatched = false;
+
+    @org.springframework.data.annotation.Version
+    Long version; // Optimistic locking to prevent concurrent read-modify-write race conditions
 }

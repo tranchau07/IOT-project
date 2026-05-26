@@ -18,4 +18,6 @@ public class SensorReadingRequest {
     Instant timestamp;
     Environment environment;
     Double voltage;
+    Boolean smokeDetected;
+    Boolean doorOpen;
 }

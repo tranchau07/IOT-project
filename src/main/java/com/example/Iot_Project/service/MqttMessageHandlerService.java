@@ -1,12 +1,14 @@
 package com.example.Iot_Project.service;
 
+import com.example.Iot_Project.document.DlqMessage;
+import com.example.Iot_Project.repository.mongo.DlqMessageRepository;
+import org.springframework.integration.acks.AcknowledgmentCallback;
+import org.springframework.integration.IntegrationMessageHeaderAccessor;
 import com.example.Iot_Project.document.Classroom;
 import com.example.Iot_Project.document.ControlLog;
 import com.example.Iot_Project.document.SensorReading;
 import com.example.Iot_Project.enums.*;
 import com.example.Iot_Project.exception.AppException;
-import com.example.Iot_Project.mapper.ControlLogMapper;
-import com.example.Iot_Project.model.Device;
 import com.example.Iot_Project.model.Environment;
 import com.example.Iot_Project.repository.mongo.ClassroomRepository;
 import com.example.Iot_Project.repository.mongo.ControlLogRepository;
@@ -18,10 +20,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
@@ -37,54 +44,100 @@ import java.util.Objects;
 public class MqttMessageHandlerService {
     ClassroomRepository classroomRepository;
     SensorReadingRepository sensorReadingRepository;
-    ControlLogMapper controlLogMapper;
     ControlLogRepository controlLogRepository;
+    MongoTemplate mongoTemplate;
+    DlqMessageRepository dlqMessageRepository;
 
     MessageChannel mqttOutboundChannel;
     ObjectMapper objectMapper;
+    SimpMessagingTemplate messagingTemplate; // For pushing realtime updates via WebSockets
 
     @ServiceActivator(inputChannel = "mqttInputChannel")
-    public void handleIncomeMessage(Message<?> message) throws JsonProcessingException {
-        String topic = Objects.requireNonNull(message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC)).toString();
-        String payload = (String) message.getPayload();
+    public void handleIncomeMessage(Message<?> message) {
+        String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC, String.class);
+        String payload = message.getPayload().toString();
+        Object ack = message.getHeaders().get(IntegrationMessageHeaderAccessor.ACKNOWLEDGMENT_CALLBACK);
+        
+        try {
+            MqttTopic type = MqttTopic.match(topic);
+            if (type == null) {
+                log.warn("[MQTT-IN] Unknown topic: {}", topic);
+            } else {
+                processMessageWithRetry(type, topic, payload);
+            }
+        } catch (Exception e) {
+            log.error("[MQTT-IN] Failed to process message, sending to DLQ: {}", e.getMessage());
+            saveToDlq(topic, payload, e.getMessage());
+        } finally {
+            if (ack instanceof AcknowledgmentCallback callback) {
+                if (!callback.isAcknowledged()) {
+                    callback.acknowledge(AcknowledgmentCallback.Status.ACCEPT);
+                }
+            }
+        }
+    }
 
-        log.info(
-                "topic: {}, payload: {}",
-                topic,
-                payload
-        );
-        MqttTopic type = MqttTopic.match(topic);
-        if (type == null) return;
+    private void saveToDlq(String topic, String payload, String errorMsg) {
+        try {
+            DlqMessage dlq = DlqMessage.builder()
+                    .topic(topic)
+                    .payload(payload)
+                    .errorMessage(errorMsg)
+                    .timestamp(Instant.now())
+                    .build();
+            dlqMessageRepository.save(dlq);
+        } catch (Exception e) {
+            log.error("Failed to save message to DLQ!", e);
+        }
+    }
 
-        switch (type) {
-            case SENSOR_READING -> handleSensorReading(topic, payload);
-            case STATE -> handleDeviceState(topic, payload);
-            case RESPONSE -> handleControlResponse(topic, payload);
+    private void processMessageWithRetry(MqttTopic type, String topic, String payload) throws Exception {
+        int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                switch (type) {
+                    case SENSOR_READING -> handleSensorReading(topic, payload);
+                    case STATE -> handleDeviceState(topic, payload);
+                    case RESPONSE -> handleControlResponse(topic, payload);
+                }
+                return; // Success
+            } catch (JsonProcessingException e) {
+                throw e; // Do not retry JSON parsing errors
+            } catch (Exception e) {
+                if (i == maxRetries - 1) {
+                    throw e; // Exhausted retries
+                }
+                log.warn("Database/Processing error, retrying {}/{}...", i + 1, maxRetries);
+                Thread.sleep(1000); // Backoff
+            }
         }
     }
 
     private void handleHeartBeat(String id) {
-        Classroom classroom = classroomRepository.findById(id).orElseThrow(() ->
-                new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));
-        Device device = classroom.getDevice();
-        device.setLastSeen(Instant.now());
-
-        if (device.getConnectivity() == ConnectivityStatus.OFFLINE) {
-            device.setConnectivity(ConnectivityStatus.ONLINE);
-            classroom.setDevice(device);
-        }
-
-        classroomRepository.save(classroom);
+        Query query = new Query(Criteria.where("_id").is(id));
+        Update update = new Update()
+                .set("device.lastSeen", Instant.now())
+                .set("device.connectivity", ConnectivityStatus.ONLINE);
+        mongoTemplate.updateFirst(query, update, Classroom.class);
     }
 
     private void handleSensorReading(String topic, String payload) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(payload);
         Environment environment = objectMapper.convertValue(jsonNode.get("environment"), Environment.class);
-        Double voltage = jsonNode.get("voltage").asDouble();
+        Double voltage = jsonNode.has("voltage") ? jsonNode.get("voltage").asDouble() : null;
+        
+        // Fix: Added missing sensor fields parsing for Firmware Team Integration
+        Boolean smokeDetected = jsonNode.has("smokeDetected") ? jsonNode.get("smokeDetected").asBoolean() : null;
+        Boolean doorOpen = jsonNode.has("doorOpen") ? jsonNode.get("doorOpen").asBoolean() : null;
 
         String[] parts = topic.split("/");
         String classroomId = parts[2];
         String deviceId = parts[3];
+
+        if (!classroomRepository.existsById(classroomId)) {
+            log.warn("[MQTT-IN] Bỏ qua Sensor Telemetry do phòng {} không tồn tại trong Database.", classroomId);
+            return;
+        }
 
         SensorReading sensorReading = SensorReading.builder()
                 .classroomId(classroomId)
@@ -92,11 +145,20 @@ public class MqttMessageHandlerService {
                 .environment(environment)
                 .timestamp(Instant.now())
                 .voltage(voltage)
+                .smokeDetected(smokeDetected)
+                .doorOpen(doorOpen)
                 .build();
 
-        log.info("Parsed payload: {}", jsonNode);
+        log.info("[MQTT-IN] Nhận Sensor Telemetry từ phòng {}: Temp={}C, Hum={}%, Occ={}, Light={}, Voltage={}V, Smoke={}, Door={}", 
+                 classroomId, environment.getTemperature(), environment.getHumidity(), 
+                 environment.getOccupancy(), environment.getLightLevel(), voltage, smokeDetected, doorOpen);
+
         handleHeartBeat(classroomId);
-        sensorReadingRepository.save(sensorReading);
+        SensorReading savedReading = sensorReadingRepository.save(sensorReading);
+        
+        // Realtime Push to Frontend via WebSocket
+        log.info("[WEBSOCKET] Đẩy dữ liệu Sensor mới nhất tới kênh /topic/classroom/{}/sensors", classroomId);
+        messagingTemplate.convertAndSend("/topic/classroom/" + classroomId + "/sensors", savedReading);
     }
 
     private void handleDeviceState(String topic, String payload) throws JsonProcessingException {
@@ -104,15 +166,28 @@ public class MqttMessageHandlerService {
         PowerStatus power = PowerStatus.valueOf(jsonNode.get("power").asText());
 
         String[] parts = topic.split("/");
-        String deviceId = parts[3];
         String classroomId = parts[2];
 
-        classroomRepository.findById(classroomId).ifPresent(classroom -> {
-            classroom.getDevice().setLastSeen(Instant.now());
-            classroom.getDevice().setPower(power);
-            classroomRepository.save(classroom);
-        });
-        handleHeartBeat(classroomId);
+        if (!classroomRepository.existsById(classroomId)) {
+            log.warn("[MQTT-IN] Bỏ qua Heartbeat State do phòng {} không tồn tại trong Database.", classroomId);
+            return;
+        }
+
+        Query query = new Query(Criteria.where("_id").is(classroomId));
+        Update update = new Update()
+                .set("device.lastSeen", Instant.now())
+                .set("device.power", power)
+                .set("device.connectivity", ConnectivityStatus.ONLINE);
+        mongoTemplate.updateFirst(query, update, Classroom.class);
+
+        log.info("[MQTT-IN] Cập nhật State (Heartbeat) từ phòng {}: Power={}, Connectivity=ONLINE", classroomId, power);
+
+        // Realtime push
+        Map<String, String> stateUpdate = new HashMap<>();
+        stateUpdate.put("power", power.name());
+        stateUpdate.put("connectivity", ConnectivityStatus.ONLINE.name());
+        messagingTemplate.convertAndSend("/topic/classroom/" + classroomId + "/state", stateUpdate);
+        log.info("[WEBSOCKET] Đẩy dữ liệu State tới kênh /topic/classroom/{}/state", classroomId);
     }
 
     private void handleControlResponse(String topic, String payload) throws JsonProcessingException {
@@ -133,7 +208,7 @@ public class MqttMessageHandlerService {
 
         if (controlLog.getStatus() == CommandStatus.SUCCESS ||
                 controlLog.getStatus() == CommandStatus.FAILED) {
-            log.info("Control {} already finalized with status {}", controlId, controlLog.getStatus());
+            log.info("[MQTT-IN] Lệnh {} cho phòng {} đã được chốt trạng thái {} từ trước, bỏ qua gói tin trùng lặp.", controlId, classroomId, controlLog.getStatus());
             return;
         }
 
@@ -142,8 +217,15 @@ public class MqttMessageHandlerService {
         controlLog.getCommand().setLastUpdated(Instant.now());
 
         if (status == CommandStatus.SUCCESS) {
-            classroom.setCurrentState(controlLog.getCommand());
-            classroom.getCurrentState().setLastUpdated(Instant.now());
+            if (controlLog.getCommand().getPower() != PowerStatus.CLEAR_FAULT) {
+                classroom.setCurrentState(controlLog.getCommand());
+                classroom.getCurrentState().setLastUpdated(Instant.now());
+            } else {
+                if (classroom.getCurrentState() != null) {
+                    classroom.getCurrentState().setPower(PowerStatus.OFF);
+                    classroom.getCurrentState().setLastUpdated(Instant.now());
+                }
+            }
         }
 
         classroom.getDevice().setLastSeen(Instant.now());
@@ -151,7 +233,10 @@ public class MqttMessageHandlerService {
         controlLogRepository.save(controlLog);
         classroomRepository.save(classroom);
 
-        log.info("Control {} updated to {}", controlId, status);
+        // Push real-time update
+        log.info("[MQTT-IN] Nhận ACK thiết bị từ phòng {}. Lệnh {} trạng thái: {}", classroomId, controlId, status);
+        log.info("[WEBSOCKET] Đẩy dữ liệu ControlLog tới kênh /topic/classroom/{}/control", classroomId);
+        messagingTemplate.convertAndSend("/topic/classroom/" + classroomId + "/control", controlLog);
     }
 
 
@@ -190,7 +275,8 @@ public class MqttMessageHandlerService {
                 .setHeader(MqttHeaders.QOS, 1)
                 .build();
 
-        log.info(message.toString());
+        log.info("[MQTT-OUT] Đang gửi lệnh điều khiển xuống phòng {} (Device: {}). Lệnh ID: {}. Reason: {}", classroomId, deviceId, created.getId(), controlLog.getReason());
+        log.info("[MQTT-OUT] RAW Publish - Topic: {}, Payload: {}", topic, payload);
 
         boolean sent = mqttOutboundChannel.send(message);
 
@@ -198,10 +284,11 @@ public class MqttMessageHandlerService {
             created.setStatus(CommandStatus.SENT);
             created.setTimestamp(Instant.now());
             controlLogRepository.save(created);
+            log.info("[MQTT-OUT] Gửi lệnh thành công tới MQTT Broker. Đợi ACK từ thiết bị...");
         } else {
             created.setStatus(CommandStatus.FAILED);
             controlLogRepository.save(created);
-            log.error("MQTT send failed for command {}", created.getId());
+            log.error("[MQTT-OUT] LỖI: Không thể gửi lệnh tới MQTT Broker (Command ID: {})", created.getId());
         }
     }
 }

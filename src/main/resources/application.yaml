@@ -21,13 +21,22 @@ server:
   address: 0.0.0.0
   port: 8080
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+
 jwt:
   secret-key: ${JWT_SECRET:Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi}
   expiration-hours: ${JWT_EXPIRATION_HOURS:1}
   issuer: ${JWT_ISSUER:IOT.com}
 
 mqtt:
-  server-uri: ${MQTT_SERVER_URI:tcp://localhost:1883}
+  server-uri: ${MQTT_SERVER_URI:tcp://10.145.52.212:1883}
   username: ${MQTT_USERNAME:admin}
   password: ${MQTT_PASSWORD:123456789}
   client-id: ${MQTT_CLIENT_ID:iot_project_server}
@@ -35,14 +44,3 @@ mqtt:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081}
 
-logging:
-  level:
-    root: INFO
-    com.example.Iot_Project: INFO
-    org.springdoc: DEBUG
-  file:
-    name: logs/application.log
-  logback:
-    rolling policy:
-      max-history: 30
-      max-file-size: 10MB

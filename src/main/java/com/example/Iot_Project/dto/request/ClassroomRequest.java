@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ClassroomRequest {
+    String id;
     String name;
     String building;
     Integer capacity;

@@ -22,7 +22,10 @@ public class SensorReading {
     String id;
     String classroomId;
     String deviceId;
+    @org.springframework.data.mongodb.core.index.Indexed(expireAfterSeconds = 15552000) // TTL: 6 months
     Instant timestamp;
     Environment environment;
     Double voltage;
+    Boolean smokeDetected;
+    Boolean doorOpen;
 }

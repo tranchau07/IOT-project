@@ -12,4 +12,6 @@ public class Environment {
     Double temperature;
     Double humidity;
     Integer occupancy;
+    Integer lightLevel;
+    Boolean motionDetected;
 }

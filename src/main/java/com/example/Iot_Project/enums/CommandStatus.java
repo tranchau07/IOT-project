@@ -11,6 +11,7 @@ public enum CommandStatus {
     SUCCESS,
     FAILED,
     REJECTED,
-    TIMEOUT
+    TIMEOUT,
+    PENDING
     ;
 }

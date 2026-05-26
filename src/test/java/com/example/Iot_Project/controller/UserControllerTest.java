@@ -38,7 +38,6 @@ class UserControllerTest {
     void setUp() {
         userCreationRequest = UserCreationRequest.builder()
                 .username("but i love you so")
-                .password("12345678")
                 .phone("0332909954")
                 .email("tranchaucbhk54@gmail.com")
                 .build();

@@ -12,27 +12,31 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+
 import java.time.Instant;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CheckDeviceConnectivity {
-    ClassroomRepository classroomRepository;
-
+    MongoTemplate mongoTemplate;
 
     @Scheduled(fixedRate = 10000)
     public void publishDeviceStatusPeriodically() {
         Instant threshold = Instant.now().minusSeconds(30);
-        List<Classroom> classroom = classroomRepository.findAll();
-        classroom.forEach(c -> {
-            if(c.getDevice().getLastSeen().isBefore(threshold)){
-                c.getDevice().setConnectivity(ConnectivityStatus.OFFLINE);
-                classroomRepository.save(c);
-            }
-        });
-
+        
+        Query query = new Query(Criteria.where("device.lastSeen").lt(threshold)
+                                        .and("device.connectivity").ne(ConnectivityStatus.OFFLINE));
+        Update update = new Update().set("device.connectivity", ConnectivityStatus.OFFLINE);
+        
+        long modifiedCount = mongoTemplate.updateMulti(query, update, Classroom.class).getModifiedCount();
+        if (modifiedCount > 0) {
+            log.warn("[CRON-HEARTBEAT] Phát hiện {} thiết bị mất kết nối quá 30s. Đã chuyển trạng thái sang OFFLINE.", modifiedCount);
+        }
     }
 }

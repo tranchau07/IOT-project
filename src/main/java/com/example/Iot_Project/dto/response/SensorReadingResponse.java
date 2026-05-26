@@ -19,4 +19,6 @@ public class SensorReadingResponse {
     Instant timestamp;
     Environment environment;
     Double voltage;
+    Boolean smokeDetected;
+    Boolean doorOpen;
 }

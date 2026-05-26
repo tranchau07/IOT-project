@@ -51,4 +51,16 @@ public class ClassroomController {
     public ApiResponse<?> delete(@PathVariable String id){
         return ApiResponse.builder().build();
     }
+
+    @PostMapping("/{id}/clear-fault")
+    public ApiResponse<?> clearFault(@PathVariable String id){
+        classroomService.clearFault(id);
+        return ApiResponse.builder().build();
+    }
+
+    @PostMapping("/{id}/turn-off")
+    public ApiResponse<?> turnOffDevice(@PathVariable String id){
+        classroomService.turnOffDevice(id);
+        return ApiResponse.builder().build();
+    }
 }
