@@ -285,10 +285,12 @@ public class MqttMessageHandlerService {
             created.setTimestamp(Instant.now());
             controlLogRepository.save(created);
             log.info("[MQTT-OUT] Gửi lệnh thành công tới MQTT Broker. Đợi ACK từ thiết bị...");
+            messagingTemplate.convertAndSend("/topic/classroom/" + classroomId + "/control", created);
         } else {
             created.setStatus(CommandStatus.FAILED);
             controlLogRepository.save(created);
             log.error("[MQTT-OUT] LỖI: Không thể gửi lệnh tới MQTT Broker (Command ID: {})", created.getId());
+            messagingTemplate.convertAndSend("/topic/classroom/" + classroomId + "/control", created);
         }
     }
 }

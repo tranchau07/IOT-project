@@ -31,6 +31,16 @@ public class ControlLogService {
         return controlLogMapper.toControlLogResponses(controlLogRepository.findByClassroomIdAndTimestampBetween(classroomId, start, end));
     }
 
+    public List<ControlLogResponse> getListBetweenTimeStampWithPage(Instant start, Instant end, String classroomId, int page, int size){
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, 
+                size, 
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "timestamp")
+        );
+        org.springframework.data.domain.Page<ControlLog> resultPage = controlLogRepository.findByClassroomIdAndTimestampBetween(classroomId, start, end, pageable);
+        return controlLogMapper.toControlLogResponses(resultPage.getContent());
+    }
+
     public void sendControlLog(ControlLogRequest request) throws JsonProcessingException {
         Classroom classroom = classroomRepository.findById(request.getClassroomId()).orElseThrow(() ->
                 new AppException(ErrorCode.CLASSROOM_NOT_EXISTED));

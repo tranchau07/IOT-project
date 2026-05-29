@@ -4,5 +4,6 @@ public enum DeviceType {
     ENV_SENSOR,
     AIR_CONDITIONER,
     LIGHT_CONTROLLER,
-    CONTROLLER
+    CONTROLLER,
+    SMART_ROOM_GATEWAY
 }

@@ -8,6 +8,7 @@ import com.example.Iot_Project.model.CurrentState;
 import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
@@ -17,6 +18,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "control_logs")
+@CompoundIndex(name = "classroom_time_idx", def = "{'classroomId': 1, 'timestamp': -1}")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ControlLog {
     @Id

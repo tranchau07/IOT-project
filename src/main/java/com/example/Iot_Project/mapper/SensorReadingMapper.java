@@ -13,5 +13,4 @@ public interface SensorReadingMapper {
     SensorReading toSensorReading(SensorReadingRequest request);
     SensorReadingResponse toSensorReadingResponse(SensorReading data);
     List<SensorReadingResponse> toSensorReadingResponses(List<SensorReading> data);
-    void updateSensorReading(@MappingTarget SensorReading data, SensorReadingRequest request);
 }

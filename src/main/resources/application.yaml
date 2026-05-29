@@ -36,11 +36,11 @@ jwt:
   issuer: ${JWT_ISSUER:IOT.com}
 
 mqtt:
-  server-uri: ${MQTT_SERVER_URI:tcp://10.145.52.212:1883}
+  server-uri: ${MQTT_SERVER_URI:tcp://broker.emqx.io:1883}
   username: ${MQTT_USERNAME:admin}
   password: ${MQTT_PASSWORD:123456789}
   client-id: ${MQTT_CLIENT_ID:iot_project_server}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8081,http://127.0.0.1:8081,http://10.145.52.236:8081}
 

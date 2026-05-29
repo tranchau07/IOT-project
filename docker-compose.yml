@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # 1. Spring Boot Backend Application
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart_classroom_backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Kết nối đến MySQL chạy local hoặc chạy ở Container đã có sẵn trên máy Host
+      - DB_URL=jdbc:mysql://host.docker.internal:3306/identity_service?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
+      
+      # Kết nối đến MongoDB chạy ở Container đã có sẵn trên máy Host
+      - MONGO_URI=mongodb://root:root@host.docker.internal:27017/hems_db?authSource=admin
+      
+      # Kết nối đến Public EMQX Broker qua Internet
+      - MQTT_SERVER_URI=tcp://broker.emqx.io:1883
+      
+      - CORS_ALLOWED_ORIGINS=http://localhost:8081,http://localhost,http://127.0.0.1,http://127.0.0.1:8081
+    # Hỗ trợ phân giải tên miền host.docker.internal trên mọi hệ điều hành (bao gồm cả Linux)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - iot_network
+    restart: always
+
+  # 2. React Frontend Application (Nginx proxy)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smart_classroom_frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+    networks:
+      - iot_network
+    restart: always
+
+networks:
+  iot_network:
+    driver: bridge

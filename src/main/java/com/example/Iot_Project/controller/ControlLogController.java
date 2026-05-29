@@ -25,10 +25,12 @@ public class ControlLogController {
     public ApiResponse<List<ControlLogResponse>> getListBetweenTimeStamp(
             @PathVariable String id,
             @RequestParam Instant start,
-            @RequestParam Instant end
+            @RequestParam Instant end,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "20") int size
     ){
         return ApiResponse.<List<ControlLogResponse>>builder()
-                .result(controlLogService.getListBetweenTimeStamp(start, end, id))
+                .result(controlLogService.getListBetweenTimeStampWithPage(start, end, id, page, size))
                 .build();
     }
 
