@@ -5,10 +5,11 @@ import com.example.Iot_Project.dto.response.ControlLogResponse;
 import com.example.Iot_Project.document.ControlLog;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ControlLogMapper {
     ControlLog toControlLog(ControlLogRequest request);
     ControlLogResponse toControlLogResponse(ControlLog device);

@@ -42,11 +42,32 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(){
         return args -> {
-          // 1. Seed Default Admin Account
+          // 1. Seed Default Roles
+          Role adminRole = roleRepository.findById("ADMIN").orElseGet(() -> {
+              Role newRole = Role.builder()
+                      .name("ADMIN")
+                      .description("Administrator role")
+                      .permissions(new HashSet<>())
+                      .build();
+              Role saved = roleRepository.save(newRole);
+              log.warn("Seeded default role 'ADMIN'");
+              return saved;
+          });
+
+          if (!roleRepository.existsById("USER")) {
+              Role userRole = Role.builder()
+                      .name("USER")
+                      .description("User role")
+                      .permissions(new HashSet<>())
+                      .build();
+              roleRepository.save(userRole);
+              log.warn("Seeded default role 'USER'");
+          }
+
+          // 2. Seed Default Admin Account
           if(!userRepository.existsByUsername("admin")){
-              Role role = roleRepository.findById("ADMIN").orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
               Set<Role> roles = new HashSet<>();
-              roles.add(role);
+              roles.add(adminRole);
 
               User user = User.builder()
                       .username("admin")

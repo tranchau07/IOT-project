@@ -1,14 +1,10 @@
 package com.example.Iot_Project.mapper;
 
-import com.example.Iot_Project.dto.request.PermissionRequest;
 import com.example.Iot_Project.dto.request.RoleRequest;
-import com.example.Iot_Project.dto.response.PermissionResponse;
 import com.example.Iot_Project.dto.response.RoleResponse;
-import com.example.Iot_Project.entity.Permission;
 import com.example.Iot_Project.entity.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 import java.util.List;
 

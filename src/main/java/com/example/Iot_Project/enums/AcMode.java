@@ -10,6 +10,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 public enum AcMode {
     COOL,
+    HEAT,
+    FAN,
+    DRY,
     ECO,
     OFF
 }

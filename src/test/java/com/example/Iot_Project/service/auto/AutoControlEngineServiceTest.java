@@ -33,6 +33,12 @@ public class AutoControlEngineServiceTest {
     @Mock
     private MqttMessageHandlerService mqttMessageHandlerService;
 
+    @Mock
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+
+    @Mock
+    private org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
+
     @InjectMocks
     private AutoControlEngineService autoControlEngineService;
 

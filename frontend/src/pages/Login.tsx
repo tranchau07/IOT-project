@@ -46,26 +46,22 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-screen flex items-center justify-center bg-background relative overflow-hidden px-4 select-none">
-      {/* Decorative neon backdrops */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-success/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
-
+    <div className="min-h-screen w-screen flex items-center justify-center bg-slate-50 relative overflow-hidden px-4 select-none">
       <div className="w-full max-w-md relative z-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-blue-400 shadow-xl shadow-primary-glowing border border-primary/20 mb-2">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 shadow-md shadow-blue-500/10 border border-blue-500/20 mb-2">
             <Radio className="h-6 w-6 text-white animate-pulse" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">Smart Room Control Center</h1>
-          <p className="text-xs text-slate-400 font-semibold max-w-xs mx-auto">
+          <h1 className="text-xl font-extrabold tracking-tight text-slate-900">Smart Room Control Center</h1>
+          <p className="text-xs text-slate-500 font-semibold max-w-xs mx-auto">
             Authorized hardware grid operations. Enter your security credentials.
           </p>
         </div>
 
-        <div className="glass-panel rounded-3xl p-6.5 shadow-2xl relative">
-          <form onSubmit={handleSubmit} className="space-y-4.5">
+        <div className="bg-white border border-slate-200/80 rounded-3xl p-8 shadow-xl shadow-slate-200/40 relative">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-3.5 rounded-xl border border-danger/30 bg-danger-glowing text-danger text-xs font-semibold flex items-center gap-2">
+              <div className="p-3.5 rounded-xl border border-rose-250 bg-rose-50 text-rose-700 text-xs font-semibold flex items-center gap-2">
                 <ShieldAlert className="h-4.5 w-4.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -75,14 +71,14 @@ export const Login: React.FC = () => {
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Username</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
                   <User className="h-4.5 w-4.5" />
                 </span>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 focus:border-primary text-slate-200 text-sm font-semibold transition-all focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 text-slate-800 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                   placeholder="e.g. admin"
                   disabled={isLoading}
                 />
@@ -93,14 +89,14 @@ export const Login: React.FC = () => {
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Password</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
                   <KeyRound className="h-4.5 w-4.5" />
                 </span>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 focus:border-primary text-slate-200 text-sm font-semibold transition-all focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-200 focus:border-blue-500 text-slate-800 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/10"
                   placeholder="••••••••"
                   disabled={isLoading}
                 />
@@ -110,7 +106,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-sm shadow-lg shadow-primary-glowing transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+              className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/10 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
             >
               <span>{isLoading ? 'Verifying Credentials...' : 'Authenticate'}</span>
               {!isLoading && <ArrowRight className="h-4.5 w-4.5" />}
@@ -119,17 +115,17 @@ export const Login: React.FC = () => {
         </div>
 
         {/* Demo credentials notification */}
-        <div className="glass-panel rounded-2xl p-4 border-slate-800/40 text-left relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-1">
-            <Sparkles className="h-3.5 w-3.5 text-primary opacity-60 animate-pulse" />
+        <div className="bg-blue-50/50 border border-blue-100/60 rounded-2xl p-4.5 text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-2">
+            <Sparkles className="h-3.5 w-3.5 text-blue-500 opacity-60 animate-pulse" />
           </div>
-          <p className="text-[10px] font-bold text-primary uppercase">DEVELOPER SANDBOX SEED</p>
-          <p className="text-[11px] text-slate-400 mt-1 font-semibold leading-relaxed">
+          <p className="text-[10px] font-bold text-blue-600 uppercase">DEVELOPER SANDBOX SEED</p>
+          <p className="text-[11px] text-slate-500 mt-1 font-semibold leading-relaxed">
             If no accounts exist, the backend auto-seeds the system. You can connect using:
             <br />
-            <span className="text-white font-bold">Username:</span> <code className="bg-slate-950 px-1 py-0.5 rounded text-primary">admin</code>
+            <span className="text-slate-800 font-bold">Username:</span> <code className="bg-blue-100/50 px-1 py-0.5 rounded text-blue-750 font-bold text-[10px]">admin</code>
             <span className="mx-2">|</span>
-            <span className="text-white font-bold">Password:</span> <code className="bg-slate-950 px-1 py-0.5 rounded text-primary">admin</code>
+            <span className="text-slate-800 font-bold">Password:</span> <code className="bg-blue-100/50 px-1 py-0.5 rounded text-blue-750 font-bold text-[10px]">admin</code>
           </p>
         </div>
       </div>
@@ -138,3 +134,4 @@ export const Login: React.FC = () => {
 };
 
 export default Login;
+

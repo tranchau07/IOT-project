@@ -161,9 +161,31 @@ public class AutoControlEngineService {
     }
 
     private void handleEmptyRoom(Classroom classroom, Instant now, SensorReading latest) throws JsonProcessingException {
+        // 1. Kiểm tra cấu hình tiết kiệm điện của phòng học
+        if (classroom.getConfig() != null && Boolean.FALSE.equals(classroom.getConfig().getAutoTurnOffFanAndLightWhenEmpty())) {
+            log.debug("[AUTO-ENGINE-IDLE] Phòng {} đã cấu hình bỏ qua tính năng tự động tắt khi phòng trống.", classroom.getId());
+            return;
+        }
+
         if (latest == null || latest.getEnvironment() == null || latest.getEnvironment().getOccupancy() == null) return;
 
+        // Nếu phòng vẫn đang có người hoạt động, không làm gì cả
         if (latest.getEnvironment().getOccupancy() > 0) return;
+
+        // 2. Kiểm tra độ trễ thao tác (Grace Period): Nếu trạng thái thiết bị vừa thay đổi gần đây (VD: bật thủ công),
+        // cho phép chờ 10 phút để người dùng có thời gian di chuyển vào phòng học.
+        Instant lastStateChange = (classroom.getCurrentState() != null && classroom.getCurrentState().getLastUpdated() != null)
+                ? classroom.getCurrentState().getLastUpdated()
+                : classroom.getCreatedAt();
+
+        if (lastStateChange != null) {
+            Duration stateDuration = Duration.between(lastStateChange, now);
+            if (stateDuration.toMinutes() < 10) {
+                log.info("[AUTO-ENGINE-IDLE] Phòng {} trống không người nhưng trạng thái thiết bị vừa thay đổi gần đây ({} phút trước, < 10 phút). Giữ nguyên thiết bị để chờ người sử dụng.", 
+                        classroom.getId(), stateDuration.toMinutes());
+                return;
+            }
+        }
 
         var lastOccupiedReadingOptional = sensorReadingRepository.findLastOccupiedReading(classroom.getId());
 

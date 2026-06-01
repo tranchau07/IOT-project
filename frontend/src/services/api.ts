@@ -157,7 +157,7 @@ export const controlService = {
     classroomId: string;
     command: {
       power: 'ON' | 'OFF' | 'CLEAR_FAULT';
-      acMode: 'COOL' | 'HEAT' | 'FAN' | 'DRY' | 'OFF';
+      acMode: 'COOL' | 'HEAT' | 'FAN' | 'DRY' | 'ECO' | 'OFF';
       acTemp: number;
       lightStates: number[];
       fanSpeed: number[];

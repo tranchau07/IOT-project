@@ -8,8 +8,6 @@ import { ControlLogsTable } from '../components/classroom/ControlLogsTable';
 import { 
   ArrowLeft, 
   School, 
-  Settings, 
-  Activity, 
   Radio, 
   RefreshCw,
   Trash2
@@ -78,8 +76,8 @@ export const ClassroomDetail: React.FC = () => {
 
   if (isLoading && !selectedClassroom) {
     return (
-      <div className="h-96 flex flex-col items-center justify-center text-xs text-slate-500 font-medium">
-        <RefreshCw className="h-6 w-6 animate-spin mr-2 text-primary" />
+      <div className="h-96 flex flex-col items-center justify-center text-xs text-slate-500 font-semibold">
+        <RefreshCw className="h-5 w-5 animate-spin mr-2 text-blue-600" />
         Syncing live data feed channels...
       </div>
     );
@@ -88,11 +86,11 @@ export const ClassroomDetail: React.FC = () => {
   if (!selectedClassroom) {
     return (
       <div className="text-center py-12 space-y-4">
-        <School className="h-12 w-12 text-slate-600 mx-auto" />
-        <h3 className="text-lg font-bold text-slate-300">Classroom Configuration Missing</h3>
+        <School className="h-12 w-12 text-slate-400 mx-auto" />
+        <h3 className="text-sm font-bold text-slate-800">Classroom Configuration Missing</h3>
         <button
           onClick={() => navigate('/')}
-          className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold transition-all"
+          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md"
         >
           Return to Cockpit
         </button>
@@ -111,31 +109,31 @@ export const ClassroomDetail: React.FC = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/')}
-            className="h-9 w-9 rounded-xl border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-850 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="h-9 w-9 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 flex items-center justify-center transition-all cursor-pointer shadow-sm"
           >
             <ArrowLeft className="h-4.5 w-4.5" />
           </button>
           
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold tracking-tight text-white">{name}</h2>
-              <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-success glowing-dot' : 'bg-slate-600'}`} />
-              <span className="text-[10px] text-slate-400 font-bold uppercase">{building} Building</span>
+              <h2 className="text-lg font-extrabold tracking-tight text-slate-900">{name}</h2>
+              <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500 glowing-dot' : 'bg-slate-400'}`} />
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{building} Building</span>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">Gateway: {device.deviceId} ({device.deviceType})</p>
+            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Gateway: {device.deviceId} ({device.deviceType})</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Realtime stream active banner */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-800 bg-[#0d1425] text-[10px] font-bold text-primary">
-            <Radio className="h-3.5 w-3.5 animate-pulse text-primary" />
-            <span>WebSocket Live Sync Active</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-100 bg-blue-50/50 text-[10px] font-bold text-blue-600">
+            <Radio className="h-3.5 w-3.5 animate-pulse text-blue-600" />
+            <span>Live Sync Active</span>
           </div>
 
           <button
             onClick={handleDeleteRoom}
-            className="p-2 rounded-xl border border-danger/20 bg-danger-glowing/10 text-danger hover:bg-danger hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition-all cursor-pointer shadow-sm"
             title="Delete Room Configuration"
           >
             <Trash2 className="h-4 w-4" />
@@ -167,3 +165,4 @@ export const ClassroomDetail: React.FC = () => {
 };
 
 export default ClassroomDetail;
+

@@ -51,7 +51,7 @@ export interface LightState {
 
 export interface CurrentState {
   power: 'ON' | 'OFF' | 'CLEAR_FAULT';
-  acMode: 'COOL' | 'HEAT' | 'FAN' | 'DRY' | 'OFF';
+  acMode: 'COOL' | 'HEAT' | 'FAN' | 'DRY' | 'ECO' | 'OFF';
   acTemp: number;
   lightStates: number[]; // e.g. [0, 1] or [0, 0]
   fanSpeed: number[];    // e.g. [0, 3] or [1, 2]

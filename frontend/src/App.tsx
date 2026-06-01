@@ -43,7 +43,7 @@ const AuthenticatedLayout: React.FC = () => {
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto px-8 bg-[#080c14]">
+        <main className="flex-1 overflow-y-auto px-8 bg-slate-50">
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/classrooms" element={<Dashboard />} />

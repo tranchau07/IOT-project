@@ -27,6 +27,7 @@ public class CheckDeviceConnectivity {
     MongoTemplate mongoTemplate;
 
     @Scheduled(fixedRate = 10000)
+    @SuppressWarnings("null")
     public void publishDeviceStatusPeriodically() {
         Instant threshold = Instant.now().minusSeconds(30);
         

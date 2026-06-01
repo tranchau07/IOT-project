@@ -117,27 +117,27 @@ export const RolePermissionManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 py-6 select-none">
+    <div className="space-y-6 py-6 select-none">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-            <KeyRound className="h-5.5 w-5.5 text-primary" />
+          <h2 className="text-lg font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+            <KeyRound className="h-5.5 w-5.5 text-blue-600" />
             Roles & Keys Matrices
           </h2>
-          <p className="text-xs text-slate-400 font-medium mt-1">Configure fine-grained access policies and credentials</p>
+          <p className="text-xs text-slate-500 font-semibold mt-1">Configure fine-grained access policies and credentials</p>
         </div>
 
         <div className="flex gap-2.5">
           <button
             onClick={() => setIsPermModalOpen(true)}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 hover:text-white transition-all text-xs font-semibold flex items-center gap-2 cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-650 hover:bg-slate-50 hover:text-slate-900 transition-all text-xs font-bold flex items-center gap-2 cursor-pointer shadow-sm"
           >
             <Plus className="h-4 w-4" />
             New Key / Permission
           </button>
           <button
             onClick={() => setIsRoleModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-lg shadow-primary-glowing transition-all flex items-center gap-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/10 transition-all flex items-center gap-2 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             New Role
@@ -146,53 +146,53 @@ export const RolePermissionManagement: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl border border-danger/30 bg-danger-glowing text-danger text-xs font-semibold flex items-center gap-2">
+        <div className="p-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs font-semibold flex items-center gap-2">
           <ShieldAlert className="h-4.5 w-4.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left 2 columns: Roles cards grid */}
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Registered System Roles</h3>
+          <h3 className="text-xs font-extrabold text-slate-450 uppercase tracking-wider">Registered System Roles</h3>
           
           {isLoading && roles.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-500 font-medium">Syncing Roles from SQL backend...</div>
+            <div className="py-12 text-center text-xs text-slate-400 font-semibold">Syncing Roles from SQL backend...</div>
           ) : roles.length === 0 ? (
-            <div className="glass-panel rounded-2xl p-12 text-center text-xs text-slate-500 italic">No roles mapped.</div>
+            <div className="bg-white border border-slate-200/80 rounded-2xl p-12 text-center text-xs text-slate-400 italic shadow-sm">No roles mapped.</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {roles.map((role) => (
-                <div key={role.name} className="glass-panel rounded-2xl p-5 space-y-4 relative overflow-hidden group">
+                <div key={role.name} className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 relative overflow-hidden group shadow-sm hover:border-blue-200 transition-all duration-200">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-lg bg-primary-glowing text-primary">
+                      <div className="p-2 rounded-lg bg-blue-50 text-blue-600 border border-blue-100/50">
                         <Shield className="h-4.5 w-4.5" />
                       </div>
                       <div>
-                        <h4 className="font-extrabold text-slate-100">{role.name}</h4>
-                        <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{role.description || 'No Description'}</p>
+                        <h4 className="font-extrabold text-slate-900">{role.name}</h4>
+                        <p className="text-[10px] text-slate-500 font-semibold mt-0.5">{role.description || 'No Description'}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleDeleteRole(role.name)}
-                      className="p-1 rounded-lg border border-danger/20 text-danger bg-danger-glowing/10 hover:bg-danger hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded-lg border border-rose-200 text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100 shadow-sm"
                       title="Delete Role"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
 
-                  <div className="space-y-1.5 border-t border-slate-800/60 pt-4">
-                    <span className="text-[9px] font-bold text-slate-500 block uppercase">Permissions / Auth Keys</span>
+                  <div className="space-y-1.5 border-t border-slate-100 pt-4">
+                    <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Permissions / Auth Keys</span>
                     <div className="flex flex-wrap gap-1">
                       {role.permissions.length === 0 ? (
-                        <span className="text-[10px] text-slate-500 italic">No permission keys linked.</span>
+                        <span className="text-[10px] text-slate-450 italic">No permission keys linked.</span>
                       ) : (
                         role.permissions.map(p => (
-                          <span key={p.name} className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-slate-900 text-slate-400 border border-slate-800">
+                          <span key={p.name} className="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-slate-50 text-slate-600 border border-slate-200/60">
                             {p.name}
                           </span>
                         ))
@@ -207,28 +207,28 @@ export const RolePermissionManagement: React.FC = () => {
 
         {/* Right 1 column: Permissions directory */}
         <div className="lg:col-span-1 space-y-4">
-          <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Auth Keys Directory</h3>
+          <h3 className="text-xs font-extrabold text-slate-450 uppercase tracking-wider">Auth Keys Directory</h3>
           
-          <div className="glass-panel rounded-2xl p-5 space-y-4">
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-sm">
             {isLoading && permissions.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-500">Syncing keys...</div>
+              <div className="py-6 text-center text-xs text-slate-400 font-semibold">Syncing keys...</div>
             ) : permissions.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-500 italic">No keys recorded.</div>
+              <div className="py-6 text-center text-xs text-slate-400 italic">No keys recorded.</div>
             ) : (
-              <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">
                 {permissions.map((perm) => (
-                  <div key={perm.name} className="flex items-center justify-between p-3 rounded-xl bg-slate-900/30 border border-slate-850/60 group">
+                  <div key={perm.name} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 border border-slate-100 group">
                     <div className="flex items-center gap-2.5">
-                      <Key className="h-4 w-4 text-primary shrink-0" />
+                      <Key className="h-4 w-4 text-blue-600 shrink-0" />
                       <div>
-                        <p className="font-extrabold text-[11px] text-slate-200">{perm.name}</p>
-                        <p className="text-[9px] text-slate-400 font-semibold">{perm.description || 'No description'}</p>
+                        <p className="font-extrabold text-[11px] text-slate-900">{perm.name}</p>
+                        <p className="text-[9px] text-slate-500 font-semibold">{perm.description || 'No description'}</p>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleDeletePermission(perm.name)}
-                      className="p-1 rounded-lg border border-danger/20 text-danger bg-danger-glowing/10 hover:bg-danger hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100 shrink-0"
+                      className="p-1 rounded-lg border border-rose-200 text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white transition-all cursor-pointer opacity-0 group-hover:opacity-100 shrink-0 shadow-sm"
                       title="Delete Permission Key"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -243,13 +243,13 @@ export const RolePermissionManagement: React.FC = () => {
 
       {/* MODAL 1: Create Role */}
       {isRoleModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border border-slate-800 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-800/80">
-              <h3 className="font-bold text-slate-100">Create Security Role</h3>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100">
+              <h3 className="font-extrabold text-slate-950">Create Security Role</h3>
               <button
                 onClick={() => setIsRoleModalOpen(false)}
-                className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center cursor-pointer"
+                className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer"
               >
                 <X className="h-4.5 w-4.5" />
               </button>
@@ -257,31 +257,31 @@ export const RolePermissionManagement: React.FC = () => {
 
             <form onSubmit={handleCreateRole} className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Role Unique Name *</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Role Unique Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. ROLE_OPERATOR"
                   value={newRoleName}
                   onChange={(e) => setNewRoleName(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/60 border border-slate-850 text-slate-200 text-sm font-semibold focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Description</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Description</label>
                 <input
                   type="text"
                   placeholder="Classroom operator credentials..."
                   value={newRoleDesc}
                   onChange={(e) => setNewRoleDesc(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/60 border border-slate-850 text-slate-200 text-sm font-semibold focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               {/* Checkboxes list of permissions */}
-              <div className="space-y-2 border-t border-slate-850/60 pt-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Link Auth Keys</span>
+              <div className="space-y-2 border-t border-slate-100 pt-4">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Link Auth Keys</span>
                 <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
                   {permissions.map(p => {
                     const isChecked = selectedPermissions.includes(p.name);
@@ -289,13 +289,13 @@ export const RolePermissionManagement: React.FC = () => {
                       <div
                         key={p.name}
                         onClick={() => togglePermSelection(p.name)}
-                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all ${
+                        className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all duration-150 ${
                           isChecked
-                            ? 'bg-primary-glowing/10 border-primary/40 text-primary font-bold'
-                            : 'bg-slate-900/30 border-slate-850/40 text-slate-400 hover:bg-slate-800/30'
+                            ? 'bg-blue-50 border-blue-200 text-blue-600 font-bold'
+                            : 'bg-white border-slate-200 text-slate-555 hover:bg-slate-50'
                         }`}
                       >
-                        {isChecked ? <CheckSquare className="h-3.5 w-3.5 shrink-0" /> : <Square className="h-3.5 w-3.5 shrink-0" />}
+                        {isChecked ? <CheckSquare className="h-3.5 w-3.5 shrink-0 text-blue-600" /> : <Square className="h-3.5 w-3.5 shrink-0 text-slate-400" />}
                         <span className="text-[10px] truncate">{p.name}</span>
                       </div>
                     );
@@ -303,17 +303,17 @@ export const RolePermissionManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-slate-800/80 pt-4 mt-4">
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsRoleModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/30 text-slate-300 hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-lg shadow-primary-glowing transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/10 transition-all cursor-pointer"
                 >
                   Create Role
                 </button>
@@ -325,13 +325,13 @@ export const RolePermissionManagement: React.FC = () => {
 
       {/* MODAL 2: Create Permission */}
       {isPermModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="glass-panel rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border border-slate-800 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-800/80">
-              <h3 className="font-bold text-slate-100">Create Permission Key</h3>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden relative border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-100">
+              <h3 className="font-extrabold text-slate-950">Create Permission Key</h3>
               <button
                 onClick={() => setIsPermModalOpen(false)}
-                className="h-8 w-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all flex items-center justify-center cursor-pointer"
+                className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all flex items-center justify-center cursor-pointer"
               >
                 <X className="h-4.5 w-4.5" />
               </button>
@@ -339,39 +339,39 @@ export const RolePermissionManagement: React.FC = () => {
 
             <form onSubmit={handleCreatePermission} className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Key Code Name *</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Key Code Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. OVERRIDE_POWER"
                   value={newPermName}
                   onChange={(e) => setNewPermName(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/60 border border-slate-850 text-slate-200 text-sm font-semibold focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Description</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Description</label>
                 <input
                   type="text"
                   placeholder="Allows manual hardware override controls..."
                   value={newPermDesc}
                   onChange={(e) => setNewPermDesc(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950/60 border border-slate-850 text-slate-200 text-sm font-semibold focus:outline-none focus:border-primary"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm font-semibold focus:outline-none focus:border-blue-500"
                 />
               </div>
 
-              <div className="flex justify-end gap-3 border-t border-slate-800/80 pt-4 mt-4">
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 mt-4">
                 <button
                   type="button"
                   onClick={() => setIsPermModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-700 bg-slate-800/30 text-slate-300 hover:text-white transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all cursor-pointer shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-lg shadow-primary-glowing transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/10 transition-all cursor-pointer"
                 >
                   Create Key
                 </button>
@@ -385,3 +385,4 @@ export const RolePermissionManagement: React.FC = () => {
 };
 
 export default RolePermissionManagement;
+

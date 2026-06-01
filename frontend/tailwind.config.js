@@ -8,28 +8,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "#0b0f19",
-        card: "#131c2e",
-        border: "#1e293b",
+        background: "#f8fafc", // Slate 50 clean canvas
+        card: "#ffffff",       // Pure white cards
+        border: "#e2e8f0",     // Slate 200 border
         primary: {
-          DEFAULT: "#3b82f6",
-          hover: "#2563eb",
-          glowing: "rgba(59, 130, 246, 0.15)",
+          DEFAULT: "#2563eb",  // Professional Blue 600
+          hover: "#1d4ed8",    // Blue 700
+          glowing: "rgba(37, 99, 235, 0.08)",
         },
         success: {
-          DEFAULT: "#10b981",
+          DEFAULT: "#10b981",  // Emerald 500
           hover: "#059669",
-          glowing: "rgba(16, 185, 129, 0.15)",
+          glowing: "rgba(16, 185, 129, 0.08)",
         },
         warning: {
-          DEFAULT: "#f59e0b",
+          DEFAULT: "#f59e0b",  // Amber 500
           hover: "#d97706",
-          glowing: "rgba(245, 158, 11, 0.15)",
+          glowing: "rgba(245, 158, 11, 0.08)",
         },
         danger: {
-          DEFAULT: "#ef4444",
+          DEFAULT: "#ef4444",  // Rose 500
           hover: "#dc2626",
-          glowing: "rgba(239, 68, 68, 0.15)",
+          glowing: "rgba(239, 68, 68, 0.08)",
         },
         slate: {
           50: "#f8fafc",
@@ -40,17 +40,18 @@ export default {
           500: "#64748b",
           600: "#475569",
           700: "#334155",
+          850: "#1e293b", // mapped for backwards-compat with some inputs
           800: "#1e293b",
           900: "#0f172a",
           950: "#020617",
         }
       },
       fontFamily: {
-        sans: ["Outfit", "Inter", "sans-serif"],
+        sans: ["Inter", "Outfit", "sans-serif"],
       },
       boxShadow: {
         glow: "0 0 15px -3px var(--tw-shadow-color)",
-        card: "0 4px 20px -2px rgba(0, 0, 0, 0.3)",
+        card: "0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)",
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -60,3 +61,4 @@ export default {
   },
   plugins: [],
 }
+

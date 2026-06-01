@@ -18,29 +18,29 @@ export const ControlLogsTable: React.FC<ControlLogsTableProps> = ({ logs }) => {
     switch (status) {
       case 'SUCCESS':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-success-glowing text-success border border-success/20">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
             <CheckCircle2 className="h-3 w-3" />
             SUCCESS
           </span>
         );
       case 'FAILED':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-danger-glowing text-danger border border-danger/20 animate-pulse">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 animate-pulse">
             <XCircle className="h-3 w-3" />
             FAILED
           </span>
         );
       case 'SENT':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary-glowing text-primary border border-primary/20 animate-pulse">
-            <Send className="h-3 w-3 animate-pulse" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 animate-pulse">
+            <Send className="h-3 w-3" />
             TRANSMITTED
           </span>
         );
       case 'CREATE':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-glowing text-warning border border-warning/20">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100">
             <Hourglass className="h-3 w-3 animate-spin" />
             PENDING
           </span>
@@ -51,7 +51,7 @@ export const ControlLogsTable: React.FC<ControlLogsTableProps> = ({ logs }) => {
   const formatCommandSummary = (cmd: ControlLog['command']) => {
     const parts = [];
     if (cmd.power === 'CLEAR_FAULT') {
-      return 'RESET HARDWARE FAULT LATITUDE';
+      return 'RESET HARDWARE FAULT STATE';
     }
     if (cmd.acMode !== 'OFF') {
       parts.push(`AC ${cmd.acMode} @ ${cmd.acTemp}°C`);
@@ -70,47 +70,47 @@ export const ControlLogsTable: React.FC<ControlLogsTableProps> = ({ logs }) => {
   };
 
   return (
-    <div className="glass-panel rounded-2xl p-5 space-y-4">
+    <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4 shadow-sm">
       <div>
-        <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">COMMAND FEED</h4>
-        <h3 className="font-bold text-slate-200 mt-0.5">Control Logs & Operations</h3>
+        <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">COMMAND FEED</h4>
+        <h3 className="font-bold text-slate-900 mt-0.5">Control Logs & Operations</h3>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="border-b border-slate-800 text-slate-400 font-semibold h-10 select-none">
+            <tr className="border-b border-slate-100 text-slate-500 font-semibold h-10 select-none">
               <th className="pb-3 pr-4">OPERATOR & MODE</th>
               <th className="pb-3 pr-4">COMMAND SPECIFICATION</th>
               <th className="pb-3 pr-4">TIME STAMP</th>
               <th className="pb-3 text-right">STATUS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/40">
+          <tbody className="divide-y divide-slate-100">
             {logs.length === 0 ? (
               <tr>
-                <td colSpan={4} className="py-8 text-center text-slate-500 italic">
+                <td colSpan={4} className="py-8 text-center text-slate-400 italic">
                   No control logs logged in the past 24 hours.
                 </td>
               </tr>
             ) : (
               logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-900/10 transition-colors h-14">
+                <tr key={log.id} className="hover:bg-slate-50/50 transition-colors h-14">
                   <td className="pr-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className={`p-1.5 rounded-lg ${log.mode === 'AUTO' ? 'bg-primary-glowing text-primary' : 'bg-warning-glowing text-warning'}`}>
+                      <div className={`p-1.5 rounded-lg border ${log.mode === 'AUTO' ? 'bg-blue-50 text-blue-600 border-blue-100/50' : 'bg-amber-50 text-amber-600 border-amber-100/50'}`}>
                         {log.mode === 'AUTO' ? <Cpu className="h-3.5 w-3.5" /> : <UserCog className="h-3.5 w-3.5" />}
                       </div>
                       <div>
-                        <p className="font-bold text-slate-200">{log.reason.replace(/_/g, ' ')}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">Mode: {log.mode}</p>
+                        <p className="font-bold text-slate-800">{log.reason.replace(/_/g, ' ')}</p>
+                        <p className="text-[9px] text-slate-400 font-semibold">Mode: {log.mode}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="pr-4 py-3 text-slate-300 font-medium">
+                  <td className="pr-4 py-3 text-slate-700 font-medium">
                     {formatCommandSummary(log.command)}
                   </td>
-                  <td className="pr-4 py-3 text-slate-400 font-medium">
+                  <td className="pr-4 py-3 text-slate-500 font-medium">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
                   <td className="py-3 text-right">
@@ -127,3 +127,4 @@ export const ControlLogsTable: React.FC<ControlLogsTableProps> = ({ logs }) => {
 };
 
 export default ControlLogsTable;
+
