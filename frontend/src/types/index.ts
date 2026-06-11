@@ -58,6 +58,18 @@ export interface CurrentState {
   lastUpdated: string;
 }
 
+export interface Schedule {
+  startTime: string;
+  endTime: string;
+  dayOfWeek: number;
+}
+
+export interface Config {
+  maxTemperature: number | null;
+  minOccupancyToTurnOnAC: number | null;
+  autoTurnOffFanAndLightWhenEmpty: boolean | null;
+}
+
 export interface Classroom {
   id: string;
   name: string;
@@ -66,6 +78,8 @@ export interface Classroom {
   device: Device;
   currentState: CurrentState;
   faultLatched: boolean;
+  schedules?: Schedule[];
+  config?: Config;
 }
 
 // 4. Sensor Telemetry Models

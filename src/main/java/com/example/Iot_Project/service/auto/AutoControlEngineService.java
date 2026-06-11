@@ -70,8 +70,8 @@ public class AutoControlEngineService {
         classrooms.parallelStream().forEach(classroom -> {
             try {
                 evaluate(classroom);
-            } catch (JsonProcessingException e) {
-                log.error("Error evaluating classroom {}", classroom.getId(), e);
+            } catch (Exception e) {
+                log.error("Error evaluating classroom {}: {}", classroom.getId(), e.getMessage(), e);
             }
         });
     }
@@ -127,6 +127,10 @@ public class AutoControlEngineService {
 
             // Pre-cooling 10 mins before class
             if (!nowTime.isBefore(beforeStart) && nowTime.isBefore(start)) {
+                if (hasRecentlyTriggered(classroom.getId(), Reason.SCHEDULE_START, 12)) {
+                    log.debug("[AUTO-ENGINE-SCHEDULE] Pre-cooling đã được gửi gần đây cho phòng {}. Bỏ qua để giữ các thay đổi thủ công.", classroom.getId());
+                    return true;
+                }
                 double avgTemp = getAverageTempLast30Min(classroom.getId());
                 log.info("[AUTO-ENGINE-SCHEDULE] Chuẩn bị vào tiết học ({} -> {}) tại phòng {}. Bật làm mát trước (Pre-cooling) (Nhiệt độ TB 30p: {}C)", start, end, classroom.getId(), avgTemp);
                 CurrentState state = buildPreClassState(classroom, avgTemp);
@@ -151,6 +155,10 @@ public class AutoControlEngineService {
                 }
 
                 if (!hasNextSchedule) {
+                    if (hasRecentlyTriggered(classroom.getId(), Reason.SCHEDULE_END, 12)) {
+                        log.debug("[AUTO-ENGINE-SCHEDULE] Lệnh tắt hết tiết học đã được gửi gần đây cho phòng {}. Bỏ qua để giữ các thay đổi thủ công.", classroom.getId());
+                        return true;
+                    }
                     log.info("[AUTO-ENGINE-SCHEDULE] Hết tiết học tại phòng {} và không có lớp tiếp theo. Kích hoạt tắt toàn bộ thiết bị.", classroom.getId());
                     sendIfChanged(classroom, buildAllOffState(classroom), Reason.SCHEDULE_END, ModeControl.SCHEDULE);
                 }
@@ -273,5 +281,13 @@ public class AutoControlEngineService {
             // Realtime push
             messagingTemplate.convertAndSend("/topic/classroom/" + classroom.getId() + "/state", newState);
         }
+    }
+
+    private boolean hasRecentlyTriggered(String classroomId, Reason reason, int minutes) {
+        Instant since = Instant.now().minus(Duration.ofMinutes(minutes));
+        Query query = new Query(Criteria.where("classroomId").is(classroomId)
+                .and("reason").is(reason)
+                .and("timestamp").gte(since));
+        return mongoTemplate.exists(query, ControlLog.class);
     }
 }

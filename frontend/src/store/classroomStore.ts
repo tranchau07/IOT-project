@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Classroom, SensorReading, ControlLog } from '../types';
+import { Classroom, SensorReading, ControlLog, Schedule, Config } from '../types';
 import { classroomService, sensorReadingService, controlService } from '../services/api';
 import { wsService } from '../services/websocket';
 
@@ -18,6 +18,7 @@ interface ClassroomState {
   sendControl: (command: any) => Promise<void>;
   clearClassroomFault: (classroomId: string) => Promise<void>;
   shutdownClassroom: (classroomId: string) => Promise<void>;
+  updateClassroomConfig: (classroomId: string, schedules: Schedule[], config: Config) => Promise<void>;
   
   // Real-time Event Handlers triggered by WebSocket subscriptions
   handleLiveSensorUpdate: (reading: SensorReading) => void;
@@ -160,6 +161,30 @@ export const useClassroomStore = create<ClassroomState>((set, get) => ({
       await classroomService.turnOff(classroomId);
     } catch (error) {
       console.error('Failed to shutdown classroom:', error);
+    }
+  },
+
+  updateClassroomConfig: async (classroomId: string, schedules: Schedule[], config: Config) => {
+    const active = get().selectedClassroom;
+    if (!active) return;
+
+    set({ isLoading: true });
+    try {
+      const updatedData = {
+        ...active,
+        schedules,
+        config
+      };
+      const response = await classroomService.update(classroomId, updatedData);
+      set({ 
+        selectedClassroom: response,
+        classrooms: get().classrooms.map(c => c.id === classroomId ? response : c),
+        isLoading: false
+      });
+    } catch (error) {
+      console.error('Failed to update classroom config:', error);
+      set({ isLoading: false });
+      throw error;
     }
   },
 

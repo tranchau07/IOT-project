@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = "lastUpdated")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CurrentState {
     AcMode acMode;

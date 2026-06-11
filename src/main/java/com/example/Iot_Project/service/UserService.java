@@ -70,9 +70,13 @@ public class UserService {
                 -> new AppException(ErrorCode.USER_DID_NOT_EXIST));
 
         userMapper.updateUser(user, request);
-        var roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getRoles() != null) {
+            var roles = roleRepository.findAllById(request.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
         return userMapper.toUserResponse(userRepository.save(user));
     }

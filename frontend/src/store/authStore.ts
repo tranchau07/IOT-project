@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { authService, setAuthCallbacks } from '../services/api';
 
 interface AuthState {
   token: string | null;
@@ -8,7 +9,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (token: string) => void;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   initialize: () => void;
 }
 
@@ -62,7 +63,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  logout: () => {
+  logout: async () => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+      try {
+        await authService.logout(token);
+      } catch (e) {
+        console.error('Logout failed on backend:', e);
+      }
+    }
     localStorage.removeItem('jwt_token');
     set({
       token: null,
@@ -101,3 +110,13 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ token: null, isAuthenticated: false, isLoading: false });
   },
 }));
+
+// Register callbacks for api token refresh and logout
+setAuthCallbacks(
+  (newToken: string) => {
+    useAuthStore.getState().login(newToken);
+  },
+  () => {
+    useAuthStore.getState().logout();
+  }
+);

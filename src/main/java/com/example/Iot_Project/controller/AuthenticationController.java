@@ -2,6 +2,8 @@ package com.example.Iot_Project.controller;
 
 import com.example.Iot_Project.dto.request.AuthenticationRequest;
 import com.example.Iot_Project.dto.request.IntrospectRequest;
+import com.example.Iot_Project.dto.request.LogoutRequest;
+import com.example.Iot_Project.dto.request.RefreshRequest;
 import com.example.Iot_Project.dto.response.ApiResponse;
 import com.example.Iot_Project.dto.response.AuthenticationResponse;
 import com.example.Iot_Project.dto.response.IntrospectResponse;
@@ -37,6 +39,19 @@ public class AuthenticationController {
     public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) throws ParseException, JOSEException {
         return ApiResponse.<IntrospectResponse>builder()
                 .result(introspectService.introspect(request))
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        authenticationService.logout(request);
+        return ApiResponse.<Void>builder().build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshRequest request) throws ParseException, JOSEException {
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(authenticationService.refreshToken(request))
                 .build();
     }
 }

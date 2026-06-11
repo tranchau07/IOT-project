@@ -33,6 +33,7 @@ management:
 jwt:
   secret-key: ${JWT_SECRET:Nfs1Gek09tLDLYg2bvUp7xgze89R1HILTVfe6beqFvEkSk9C68mtqE0xkFxrPrCi}
   expiration-hours: ${JWT_EXPIRATION_HOURS:1}
+  refreshable-hours: ${JWT_REFRESHABLE_HOURS:24}
   issuer: ${JWT_ISSUER:IOT.com}
 
 mqtt:

@@ -5,6 +5,7 @@ import { DeviceControlPanel } from '../components/classroom/DeviceControlPanel';
 import { SensorDisplay } from '../components/classroom/SensorDisplay';
 import { LiveTelemetryChart } from '../components/classroom/LiveTelemetryChart';
 import { ControlLogsTable } from '../components/classroom/ControlLogsTable';
+import { AutoConfigPanel } from '../components/classroom/AutoConfigPanel';
 import { 
   ArrowLeft, 
   School, 
@@ -150,6 +151,9 @@ export const ClassroomDetail: React.FC = () => {
 
           {/* Interactive controls (lights, fans, AC, faults) */}
           <DeviceControlPanel classroom={selectedClassroom} />
+
+          {/* Automation Scheduling & Energy settings panel */}
+          <AutoConfigPanel classroom={selectedClassroom} />
 
           {/* scrolling trends chart */}
           <LiveTelemetryChart readings={sensorReadings} />

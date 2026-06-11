@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { useAuthStore } from '../store/authStore';
 import { 
   ApiResponse, 
   AuthenticationResponse, 
@@ -20,10 +19,21 @@ export const api = axios.create({
   },
 });
 
+let onTokenRefreshedCallback: ((token: string) => void) | null = null;
+let onLogoutRequiredCallback: (() => void) | null = null;
+
+export const setAuthCallbacks = (
+  onRefreshed: (token: string) => void,
+  onLogout: () => void
+) => {
+  onTokenRefreshedCallback = onRefreshed;
+  onLogoutRequiredCallback = onLogout;
+};
+
 // Request Interceptor: Attach JWT Token automatically
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
+    const token = localStorage.getItem('jwt_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -32,13 +42,87 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle HTTP 401 Unauthorized globally
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response Interceptor: Handle HTTP 401 Unauthorized globally and refresh token
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      useAuthStore.getState().logout();
+  async (error) => {
+    const originalRequest = error.config;
+
+    const isAuthRequest = originalRequest.url && (
+      originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/refresh') ||
+      originalRequest.url.includes('/auth/logout')
+    );
+
+    if (error.response && error.response.status === 401 && !isAuthRequest && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const currentToken = localStorage.getItem('jwt_token');
+      if (currentToken) {
+        try {
+          const response = await axios.post<ApiResponse<AuthenticationResponse>>(
+            `${API_BASE}/auth/refresh`,
+            { token: currentToken }
+          );
+          
+          const newToken = response.data.result.token;
+          
+          if (onTokenRefreshedCallback) {
+            onTokenRefreshedCallback(newToken);
+          } else {
+            localStorage.setItem('jwt_token', newToken);
+          }
+          
+          processQueue(null, newToken);
+          isRefreshing = false;
+          
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        } catch (refreshError) {
+          processQueue(refreshError, null);
+          isRefreshing = false;
+          if (onLogoutRequiredCallback) {
+            onLogoutRequiredCallback();
+          } else {
+            localStorage.removeItem('jwt_token');
+          }
+          return Promise.reject(refreshError);
+        }
+      } else {
+        if (onLogoutRequiredCallback) {
+          onLogoutRequiredCallback();
+        }
+      }
     }
+
     return Promise.reject(error);
   }
 );
@@ -58,6 +142,17 @@ export const authService = {
       token,
     });
     return response.data.result.isValid;
+  },
+
+  logout: async (token: string): Promise<void> => {
+    await api.post('/auth/logout', { token });
+  },
+
+  refresh: async (token: string): Promise<string> => {
+    const response = await api.post<ApiResponse<AuthenticationResponse>>('/auth/refresh', {
+      token,
+    });
+    return response.data.result.token;
   },
 };
 
